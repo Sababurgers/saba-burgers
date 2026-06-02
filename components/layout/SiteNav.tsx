@@ -80,7 +80,7 @@ export function SiteNav() {
           )}
           <button
             onClick={() => setOpen((v) => !v)}
-            className="w-10 h-10 grid place-items-center rounded-md border border-paper/20"
+            className="w-10 h-10 grid place-items-center rounded-md border border-paper/20 cursor-pointer"
             aria-label="Menú"
           >
             {open ? <X size={18} /> : <Menu size={18} />}

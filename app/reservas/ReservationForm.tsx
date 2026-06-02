@@ -124,7 +124,7 @@ export function ReservationForm() {
               type="button"
               onClick={() => setValue("partySize", Math.max(1, partySize - 1))}
               aria-label="Quitar persona"
-              className="w-11 h-11 grid place-items-center text-lg text-stone hover:bg-paper-3 hover:text-carbon-800 active:scale-95 transition"
+              className="w-11 h-11 grid place-items-center text-lg text-stone hover:bg-paper-3 hover:text-carbon-800 active:scale-95 transition cursor-pointer"
             >
               −
             </button>
@@ -140,7 +140,7 @@ export function ReservationForm() {
               type="button"
               onClick={() => setValue("partySize", Math.min(10, partySize + 1))}
               aria-label="Añadir persona"
-              className="w-11 h-11 grid place-items-center text-lg text-stone hover:bg-paper-3 hover:text-carbon-800 active:scale-95 transition"
+              className="w-11 h-11 grid place-items-center text-lg text-stone hover:bg-paper-3 hover:text-carbon-800 active:scale-95 transition cursor-pointer"
             >
               +
             </button>
@@ -259,7 +259,7 @@ export function ReservationForm() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-tomato hover:bg-tomato-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed transition text-paper font-mono text-xs uppercase tracking-[0.14em] px-6 py-3.5 rounded-full font-semibold"
+          className="bg-tomato hover:bg-tomato-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed transition text-paper font-mono text-xs uppercase tracking-[0.14em] px-6 py-3.5 rounded-full font-semibold cursor-pointer"
         >
           {loading ? "Reservando…" : "Reservar mesa →"}
         </button>

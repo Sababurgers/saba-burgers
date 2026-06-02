@@ -101,7 +101,7 @@ export function CheckoutClient() {
                 <div className="flex items-center gap-2 bg-paper-3 rounded-full px-2 py-1 font-mono text-[13px]">
                   <button
                     onClick={() => setQty(item.slug, item.qty - 1)}
-                    className="w-5 h-5 grid place-items-center hover:text-tomato transition"
+                    className="w-5 h-5 grid place-items-center hover:text-tomato transition cursor-pointer"
                     aria-label="Quitar uno"
                   >
                     −
@@ -109,7 +109,7 @@ export function CheckoutClient() {
                   <span className="min-w-[1ch] text-center">{item.qty}</span>
                   <button
                     onClick={() => setQty(item.slug, item.qty + 1)}
-                    className="w-5 h-5 grid place-items-center hover:text-tomato transition"
+                    className="w-5 h-5 grid place-items-center hover:text-tomato transition cursor-pointer"
                     aria-label="Sumar uno"
                   >
                     +
@@ -300,7 +300,7 @@ export function CheckoutClient() {
         <button
           onClick={handlePay}
           disabled={loading}
-          className="mt-5 w-full bg-tomato hover:bg-tomato-700 disabled:opacity-60 disabled:cursor-not-allowed transition text-paper font-mono text-xs uppercase tracking-[0.14em] py-3.5 rounded-full font-semibold"
+          className="mt-5 w-full bg-tomato hover:bg-tomato-700 disabled:opacity-60 disabled:cursor-not-allowed transition text-paper font-mono text-xs uppercase tracking-[0.14em] py-3.5 rounded-full font-semibold cursor-pointer"
         >
           {loading ? "Procesando…" : "Pagar →"}
         </button>
