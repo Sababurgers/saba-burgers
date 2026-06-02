@@ -3,17 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, ShoppingCart } from "lucide-react";
+import { Menu, X, ShoppingCart, MapPin } from "lucide-react";
 import { Lockup } from "@/components/brand/Lockup";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/lib/cart/store";
 
 const NAV = [
-  { href: "/carta", label: "Carta" },
-  { href: "/reservas", label: "Reservas" },
-  { href: "/nuestro-producto", label: "Nuestro producto" },
-  { href: "/ubicacion", label: "Ubicación" },
+  { href: "/carta", label: "Carta", icon: null },
+  { href: "/reservas", label: "Reservas", icon: null },
+  { href: "/nuestro-producto", label: "Nuestro producto", icon: null },
+  { href: "/ubicacion", label: "Ubicación", icon: MapPin },
 ];
 
 export function SiteNav() {
@@ -41,6 +41,7 @@ export function SiteNav() {
                   active ? "text-paper" : "text-paper/80 hover:text-paper"
                 )}
               >
+                {item.icon && <item.icon size={13} strokeWidth={2.2} className="inline-block mr-1 -mt-0.5" />}
                 {item.label}
                 {active && (
                   <span className="absolute left-0 right-0 -bottom-1 h-0.5 bg-gold" />
