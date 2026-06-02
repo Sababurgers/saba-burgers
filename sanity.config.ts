@@ -8,6 +8,31 @@ export default defineConfig({
   projectId: "fnksuhl8",
   dataset: "production",
   basePath: "/studio",
-  plugins: [structureTool()],
+  plugins: [
+    structureTool({
+      structure: (S) =>
+        S.list()
+          .title("Saba Burgers CMS")
+          .items([
+            S.listItem()
+              .title("🖼️  Imágenes del sitio")
+              .child(
+                S.document()
+                  .schemaType("siteSettings")
+                  .documentId("siteSettings")
+                  .title("Imágenes del sitio")
+              ),
+            S.divider(),
+            S.listItem()
+              .title("🍔  Productos")
+              .schemaType("product")
+              .child(S.documentTypeList("product").title("Productos")),
+            S.listItem()
+              .title("📂  Categorías")
+              .schemaType("category")
+              .child(S.documentTypeList("category").title("Categorías")),
+          ]),
+    }),
+  ],
   schema: { types: schemaTypes },
 });
