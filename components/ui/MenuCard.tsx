@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/lib/cart/store";
 
@@ -34,8 +35,18 @@ const BADGE_LABEL: Record<string, string> = {
 };
 
 export function MenuCard({ product }: { product: MenuCardProduct }) {
-  const { addItem, setQty, items } = useCartStore();
-  const qty = items.find((i) => i.slug === product.slug)?.qty ?? 0;
+  const addItem = useCartStore((s) => s.addItem);
+  const [count, setCount] = useState(1);
+  const [added, setAdded] = useState(false);
+
+  function handleAdd() {
+    for (let i = 0; i < count; i++) addItem(product);
+    setAdded(true);
+    setTimeout(() => {
+      setAdded(false);
+      setCount(1);
+    }, 1200);
+  }
 
   return (
     <article className="bg-paper border border-carbon-800/12 rounded-lg overflow-hidden flex flex-col">
@@ -76,19 +87,19 @@ export function MenuCard({ product }: { product: MenuCardProduct }) {
       </div>
 
       <div className="px-5 pb-5 flex items-center gap-3">
-        {/* Counter */}
+        {/* Selector de cantidad */}
         <div className="flex items-center gap-2 border border-carbon-800/15 rounded-full px-1 py-1">
           <button
-            onClick={() => setQty(product.slug, qty - 1)}
-            disabled={qty === 0}
+            onClick={() => setCount((c) => Math.max(1, c - 1))}
+            disabled={count <= 1}
             className="w-7 h-7 rounded-full flex items-center justify-center font-mono text-base leading-none transition hover:bg-carbon-800/8 disabled:opacity-25 disabled:pointer-events-none cursor-pointer"
             aria-label="Quitar uno"
           >
             −
           </button>
-          <span className="font-mono text-sm font-semibold w-4 text-center">{qty}</span>
+          <span className="font-mono text-sm font-semibold w-4 text-center">{count}</span>
           <button
-            onClick={() => setQty(product.slug, qty + 1)}
+            onClick={() => setCount((c) => c + 1)}
             className="w-7 h-7 rounded-full flex items-center justify-center font-mono text-base leading-none transition hover:bg-carbon-800/8 cursor-pointer"
             aria-label="Añadir uno"
           >
@@ -96,12 +107,18 @@ export function MenuCard({ product }: { product: MenuCardProduct }) {
           </button>
         </div>
 
-        {/* Add button */}
+        {/* Botón añadir */}
         <button
-          onClick={() => addItem(product)}
-          className="flex-1 font-mono text-[11px] uppercase tracking-[0.14em] py-3 rounded-full font-semibold transition active:scale-95 bg-tomato hover:bg-tomato-700 text-paper cursor-pointer"
+          onClick={handleAdd}
+          disabled={added}
+          className={cn(
+            "flex-1 font-mono text-[11px] uppercase tracking-[0.14em] py-3 rounded-full font-semibold transition active:scale-95 cursor-pointer",
+            added
+              ? "bg-success text-paper pointer-events-none"
+              : "bg-tomato hover:bg-tomato-700 text-paper"
+          )}
         >
-          Añadir
+          {added ? "✓ Añadido" : "Añadir"}
         </button>
       </div>
     </article>
