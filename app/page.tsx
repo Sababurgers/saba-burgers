@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/Button";
 import { MenuCard } from "@/components/ui/MenuCard";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { REVIEWS, REVIEW_STATS } from "@/lib/data/reviews";
+
+export const dynamic = "force-dynamic";
 import { getFeaturedProducts, getSiteSettings } from "@/lib/sanity/queries";
 
 export default async function HomePage() {

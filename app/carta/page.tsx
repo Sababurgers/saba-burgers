@@ -2,6 +2,8 @@ import { MenuCard } from "@/components/ui/MenuCard";
 import { CartaTabs } from "@/components/ui/CartaTabs";
 import { getProducts, getCategories } from "@/lib/sanity/queries";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Carta — Saba Burgers",
   description: "Smashburgers, acompañamientos, veggies, postres y bebidas. La carta completa de Saba Burgers.",
