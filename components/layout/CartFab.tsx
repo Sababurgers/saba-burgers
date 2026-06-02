@@ -12,7 +12,6 @@ export function CartFab() {
   const subtotal = useCartStore((s) => s.subtotal());
   const count    = useCartStore((s) => s.count());
   const setQty   = useCartStore((s) => s.setQty);
-  const clear    = useCartStore((s) => s.clear);
 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -41,15 +40,7 @@ export function CartFab() {
         <div className="p-4 flex flex-col gap-3">
 
           {/* Cabecera */}
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/40">Tu pedido</span>
-            <button
-              onClick={() => { clear(); setOpen(false); }}
-              className="font-mono text-[10px] uppercase tracking-[0.14em] text-paper/40 hover:text-paper/70 transition cursor-pointer"
-            >
-              Vaciar
-            </button>
-          </div>
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/40">Tu pedido</span>
 
           {/* Lista con controles */}
           <div className="flex flex-col gap-1 max-h-56 overflow-y-auto -mx-1 px-1">
