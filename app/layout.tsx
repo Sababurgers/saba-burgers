@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Alfa_Slab_One, Bricolage_Grotesque, DM_Sans, JetBrains_Mono } from "next/font/google";
-import { SiteNav } from "@/components/layout/SiteNav";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { CartFab } from "@/components/layout/CartFab";
+import { SiteShell } from "@/components/layout/SiteShell";
 import "./globals.css";
 
 const alfa = Alfa_Slab_One({
@@ -50,10 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${alfa.variable} ${bricolage.variable} ${dmSans.variable} ${jetbrains.variable}`}
     >
       <body className="bg-paper text-carbon-800 min-h-screen flex flex-col">
-        <SiteNav />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
-        <CartFab />
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   );
