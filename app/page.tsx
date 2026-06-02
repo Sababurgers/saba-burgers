@@ -29,9 +29,9 @@ export default async function HomePage() {
           style={{ background: "radial-gradient(circle, rgba(224,161,58,.18), transparent 70%)" }}
           aria-hidden
         />
-        <div className="max-w-screen-xl mx-auto px-6 md:px-8 py-16 md:py-24 grid md:grid-cols-[1.1fr_1fr] gap-12 items-center relative">
+        <div className="max-w-screen-xl mx-auto px-6 md:px-8 pt-10 pb-16 md:pt-14 md:pb-24 grid md:grid-cols-[1.1fr_1fr] gap-12 items-center relative">
           <div>
-            <span className="inline-flex items-center gap-2 bg-paper/8 border border-paper/15 rounded-full px-3 py-1.5 mb-4 font-mono text-[11px] uppercase tracking-[0.14em]">
+            <span className="inline-flex items-center gap-2 bg-paper/8 border border-paper/15 rounded-full px-3 py-1.5 mb-7 font-mono text-[11px] uppercase tracking-[0.14em]">
               <span className="w-1.5 h-1.5 rounded-full bg-gold" />
               Hamburguesas con alma · desde 2022
             </span>

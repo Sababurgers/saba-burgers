@@ -26,12 +26,12 @@ export default async function CartaPage() {
     <>
       {/* HERO */}
       <section className="bg-carbon-800 text-paper">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-8 pt-12 md:pt-16 pb-8">
+        <div className="max-w-screen-xl mx-auto px-6 md:px-8 pt-8 md:pt-12 pb-8">
           <span className="inline-flex items-center gap-2 bg-paper/8 border border-paper/15 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em]">
             <span className="w-1.5 h-1.5 rounded-full bg-gold" />
             13:00–16:30 · 20:00–23:30 · Lun a Dom
           </span>
-          <h1 className="font-display text-[64px] md:text-[96px] leading-[0.92] text-gold mt-2 mb-3 ">
+          <h1 className="font-display text-[64px] md:text-[96px] leading-[0.92] text-gold mt-5 mb-3">
             Carta
           </h1>
           <p className="text-paper/80 max-w-[50ch]">

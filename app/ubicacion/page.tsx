@@ -11,12 +11,12 @@ export default function UbicacionPage() {
     <>
       {/* HERO */}
       <section className="bg-carbon-800 text-paper">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-8 pt-12 md:pt-14 pb-7">
+        <div className="max-w-screen-xl mx-auto px-6 md:px-8 pt-8 md:pt-12 pb-7">
           <span className="inline-flex items-center gap-2 bg-paper/8 border border-paper/15 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em]">
             <span className="w-1.5 h-1.5 rounded-full bg-gold" />
             L&apos;OLLERIA · VALENCIA
           </span>
-          <h1 className="font-display text-[56px] md:text-[80px] leading-[0.92] text-gold mt-2 mb-2">
+          <h1 className="font-display text-[56px] md:text-[80px] leading-[0.92] text-gold mt-5 mb-2">
             Ubicación
           </h1>
           <p className="text-paper/80 max-w-[50ch]">
