@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/lib/cart/store";
+
 export interface MenuCardProduct {
   slug: string;
   name: string;
@@ -34,24 +34,14 @@ const BADGE_LABEL: Record<string, string> = {
 };
 
 export function MenuCard({ product }: { product: MenuCardProduct }) {
-  const addItem = useCartStore((s) => s.addItem);
-  const [added, setAdded] = useState(false);
-
-  function handleAdd() {
-    addItem(product);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1200);
-  }
+  const { addItem, setQty, items } = useCartStore();
+  const qty = items.find((i) => i.slug === product.slug)?.qty ?? 0;
 
   return (
     <article className="bg-paper border border-carbon-800/12 rounded-lg overflow-hidden flex flex-col">
       <div className="aspect-[4/3] bg-paper-3 relative overflow-hidden">
         {product.imageUrl ? (
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
+          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
         ) : (
           <div
             className="w-full h-full grid items-end p-3 font-mono text-[11px] tracking-[0.18em] text-stone uppercase"
@@ -61,16 +51,15 @@ export function MenuCard({ product }: { product: MenuCardProduct }) {
           </div>
         )}
         {product.badge && (
-          <span
-            className={cn(
-              "absolute top-3 left-3 font-mono text-[10px] uppercase tracking-[0.14em] px-2.5 py-1 rounded-full font-semibold",
-              BADGE_STYLES[product.badge] ?? "bg-stone text-paper"
-            )}
-          >
+          <span className={cn(
+            "absolute top-3 left-3 font-mono text-[10px] uppercase tracking-[0.14em] px-2.5 py-1 rounded-full font-semibold",
+            BADGE_STYLES[product.badge] ?? "bg-stone text-paper"
+          )}>
             {BADGE_LABEL[product.badge] ?? product.badge}
           </span>
         )}
       </div>
+
       <div className="p-5 flex flex-col gap-2 flex-1">
         <div className="flex items-baseline justify-between gap-3">
           <h4 className="font-section font-bold text-lg">{product.name}</h4>
@@ -85,17 +74,34 @@ export function MenuCard({ product }: { product: MenuCardProduct }) {
           </span>
         )}
       </div>
-      <div className="px-5 pb-5">
+
+      <div className="px-5 pb-5 flex items-center gap-3">
+        {/* Counter */}
+        <div className="flex items-center gap-2 border border-carbon-800/15 rounded-full px-1 py-1">
+          <button
+            onClick={() => setQty(product.slug, qty - 1)}
+            disabled={qty === 0}
+            className="w-7 h-7 rounded-full flex items-center justify-center font-mono text-base leading-none transition hover:bg-carbon-800/8 disabled:opacity-25 disabled:pointer-events-none cursor-pointer"
+            aria-label="Quitar uno"
+          >
+            −
+          </button>
+          <span className="font-mono text-sm font-semibold w-4 text-center">{qty}</span>
+          <button
+            onClick={() => setQty(product.slug, qty + 1)}
+            className="w-7 h-7 rounded-full flex items-center justify-center font-mono text-base leading-none transition hover:bg-carbon-800/8 cursor-pointer"
+            aria-label="Añadir uno"
+          >
+            +
+          </button>
+        </div>
+
+        {/* Add button */}
         <button
-          onClick={handleAdd}
-          className={cn(
-            "w-full font-mono text-[11px] uppercase tracking-[0.14em] py-3 rounded-full font-semibold transition active:scale-95",
-            added
-              ? "bg-success text-paper pointer-events-none"
-              : "bg-tomato hover:bg-tomato-700 text-paper"
-          )}
+          onClick={() => addItem(product)}
+          className="flex-1 font-mono text-[11px] uppercase tracking-[0.14em] py-3 rounded-full font-semibold transition active:scale-95 bg-tomato hover:bg-tomato-700 text-paper cursor-pointer"
         >
-          {added ? "✓ Añadido" : "Añadir +"}
+          Añadir
         </button>
       </div>
     </article>
