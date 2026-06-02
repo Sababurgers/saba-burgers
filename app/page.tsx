@@ -35,7 +35,7 @@ export default async function HomePage() {
               <span className="w-1.5 h-1.5 rounded-full bg-gold" />
               Hamburguesas con alma · desde 2022
             </span>
-            <h1 className="font-display text-[56px] md:text-[88px] leading-[0.92] mb-5 [text-shadow:0.06em_0.06em_0_#0F0D0B]">
+            <h1 className="font-display text-[56px] md:text-[88px] leading-[0.92] mb-5 ">
               Brasa,<br />queso y<br />
               <span className="text-gold">nada más.</span>
             </h1>
@@ -180,7 +180,7 @@ export default async function HomePage() {
       <section className="bg-tomato text-paper">
         <div className="max-w-screen-xl mx-auto px-6 md:px-8 py-16 md:py-20 grid md:grid-cols-[1.2fr_1fr] gap-8 items-center">
           <div>
-            <h3 className="font-display text-[44px] md:text-[56px] leading-[0.95] mb-3 [text-shadow:0.075em_0.075em_0_var(--color-tomato-700)]">
+            <h3 className="font-display text-[44px] md:text-[56px] leading-[0.95] mb-3 ">
               ¿Y entonces?
             </h3>
             <p className="max-w-[42ch] opacity-90">Pide por delivery o reserva una mesa. En 15 minutos tienes brasa servida.</p>

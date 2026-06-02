@@ -17,9 +17,9 @@ export function SectionHeader({ title, subtitle, variant = "light", className }:
       <h3
         className={cn(
           "font-display text-[42px] md:text-[52px] leading-[0.95] mb-2",
-          variant === "light" && "text-carbon-800 [text-shadow:0.075em_0.075em_0_var(--color-carbon-800)] [text-shadow:0.075em_0.075em_0_color-mix(in_srgb,var(--color-gold)_100%,transparent)]",
-          variant === "dark" && "text-paper [text-shadow:0.075em_0.075em_0_var(--color-gold)]",
-          variant === "cream" && "text-carbon-800 [text-shadow:0.075em_0.075em_0_var(--color-gold)]"
+          variant === "light" && "text-carbon-800",
+          variant === "dark" && "text-paper",
+          variant === "cream" && "text-carbon-800"
         )}
       >
         {title}

@@ -31,7 +31,7 @@ export default async function CartaPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-gold" />
             13:00–16:30 · 20:00–23:30 · Lun a Dom
           </span>
-          <h1 className="font-display text-[64px] md:text-[96px] leading-[0.92] text-gold mt-2 mb-3 [text-shadow:0.05em_0.05em_0_#0F0D0B]">
+          <h1 className="font-display text-[64px] md:text-[96px] leading-[0.92] text-gold mt-2 mb-3 ">
             Carta
           </h1>
           <p className="text-paper/80 max-w-[50ch]">
@@ -51,7 +51,7 @@ export default async function CartaPage() {
           <section key={cat.slug} id={cat.slug} className={BG_BY_INDEX[i] ?? "bg-paper"}>
             <div className="max-w-screen-xl mx-auto px-6 md:px-8 py-12 md:py-14">
               <header className="mb-7">
-                <h3 className="font-display text-[36px] md:text-[42px] leading-none mb-2 [text-shadow:0.07em_0.07em_0_var(--color-gold-700)]">
+                <h3 className="font-display text-[36px] md:text-[42px] leading-none mb-2 ">
                   {cat.name}
                 </h3>
                 <p className="text-stone max-w-[50ch]">{CATEGORY_DESC[cat.slug] ?? ""}</p>

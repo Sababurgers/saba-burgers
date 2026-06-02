@@ -23,7 +23,7 @@ export default function ConfirmacionPedidoPage() {
           <span className="w-1.5 h-1.5 rounded-full bg-success" />
           Pedido confirmado
         </span>
-        <h1 className="font-display text-[44px] md:text-[64px] leading-[0.92] mt-2 mb-3 [text-shadow:0.06em_0.06em_0_var(--color-gold-700)]">
+        <h1 className="font-display text-[44px] md:text-[64px] leading-[0.92] mt-2 mb-3 ">
           ¡Brasa servida!
         </h1>
         <p className="text-stone max-w-[46ch] mx-auto mb-8">

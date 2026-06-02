@@ -16,7 +16,7 @@ export default function ReservasPage() {
           <span className="w-1.5 h-1.5 rounded-full bg-tomato" />
           Reservas · gratis
         </span>
-        <h1 className="font-display text-[44px] md:text-[64px] leading-[0.92] mb-3 [text-shadow:0.06em_0.06em_0_var(--color-gold-700)]">
+        <h1 className="font-display text-[44px] md:text-[64px] leading-[0.92] mb-3 ">
           Reserva tu mesa
         </h1>
         <p className="text-stone">

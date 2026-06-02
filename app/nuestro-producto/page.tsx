@@ -235,7 +235,7 @@ export default function NuestroProductoPage() {
               <span className="w-1.5 h-1.5 rounded-full bg-paper" />
               Después de leer esto
             </span>
-            <h3 className="font-display text-[40px] md:text-[48px] leading-[0.95] mb-2 [text-shadow:0.075em_0.075em_0_var(--color-tomato-700)]">
+            <h3 className="font-display text-[40px] md:text-[48px] leading-[0.95] mb-2 ">
               Pruébala
             </h3>
             <p className="opacity-90 max-w-[42ch]">
