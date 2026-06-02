@@ -66,7 +66,7 @@ export function CartFab() {
             onClick={() => router.push("/pedido")}
             className="w-full bg-tomato hover:bg-tomato-700 transition active:scale-[0.98] text-paper font-mono text-[11px] uppercase tracking-[0.14em] font-semibold py-3 rounded-full cursor-pointer"
           >
-            Ver pedido →
+            Pedir →
           </button>
         </div>
       </div>

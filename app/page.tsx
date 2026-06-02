@@ -44,8 +44,7 @@ export default async function HomePage() {
               tostado en plancha. Eso es todo. Eso es Saba.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/pedido"><Button size="lg">Pedir ahora →</Button></Link>
-              <Link href="/carta"><Button size="lg" variant="dark-ghost">Ver carta</Button></Link>
+              <Link href="/carta"><Button size="lg">Pedir ahora →</Button></Link>
             </div>
             <dl className="mt-9 pt-6 border-t border-paper/10 grid grid-cols-3 gap-6">
               <div>
