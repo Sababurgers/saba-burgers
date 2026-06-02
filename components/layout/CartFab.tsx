@@ -2,25 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, X } from "lucide-react";
 import { useCartStore } from "@/lib/cart/store";
 
 export function CartFab() {
-  const pathname  = usePathname();
-  const router    = useRouter();
-  const items     = useCartStore((s) => s.items);
-  const subtotal  = useCartStore((s) => s.subtotal());
-  const count     = useCartStore((s) => s.count());
+  const pathname = usePathname();
+  const router   = useRouter();
+  const items    = useCartStore((s) => s.items);
+  const subtotal = useCartStore((s) => s.subtotal());
+  const count    = useCartStore((s) => s.count());
+  const setQty   = useCartStore((s) => s.setQty);
+  const clear    = useCartStore((s) => s.clear);
+
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Cerrar al hacer click fuera
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    function onClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
-    if (open) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    if (open) document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
   }, [open]);
 
   if (count === 0 || pathname.startsWith("/pedido")) return null;
@@ -38,19 +40,52 @@ export function CartFab() {
       `}>
         <div className="p-4 flex flex-col gap-3">
 
-          {/* Lista de productos */}
-          <div className="flex flex-col gap-2.5 max-h-48 overflow-y-auto">
+          {/* Cabecera */}
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/40">Tu pedido</span>
+            <button
+              onClick={() => { clear(); setOpen(false); }}
+              className="font-mono text-[10px] uppercase tracking-[0.14em] text-paper/40 hover:text-paper/70 transition cursor-pointer"
+            >
+              Vaciar
+            </button>
+          </div>
+
+          {/* Lista con controles */}
+          <div className="flex flex-col gap-1 max-h-56 overflow-y-auto -mx-1 px-1">
             {items.map((item) => (
-              <div key={item.slug} className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-5 h-5 rounded-full bg-tomato text-paper flex items-center justify-center font-mono text-[10px] font-bold flex-none">
-                    {item.qty}
-                  </span>
-                  <span className="text-sm text-paper/90 truncate">{item.name}</span>
+              <div key={item.slug} className="flex items-center gap-2 py-1.5">
+                {/* Nombre */}
+                <span className="flex-1 text-sm text-paper/90 truncate min-w-0">{item.name}</span>
+
+                {/* Controles cantidad */}
+                <div className="flex items-center gap-1 bg-paper/8 rounded-full px-1.5 py-0.5 flex-none">
+                  <button
+                    onClick={() => setQty(item.slug, item.qty - 1)}
+                    className="w-5 h-5 flex items-center justify-center text-paper/60 hover:text-paper transition cursor-pointer text-base leading-none"
+                    aria-label="Quitar uno"
+                  >−</button>
+                  <span className="font-mono text-xs w-4 text-center font-bold">{item.qty}</span>
+                  <button
+                    onClick={() => setQty(item.slug, item.qty + 1)}
+                    className="w-5 h-5 flex items-center justify-center text-paper/60 hover:text-paper transition cursor-pointer text-base leading-none"
+                    aria-label="Añadir uno"
+                  >+</button>
                 </div>
-                <span className="font-mono text-xs text-paper/50 flex-none">
+
+                {/* Precio */}
+                <span className="font-mono text-xs text-paper/50 w-14 text-right flex-none">
                   {(item.price * item.qty).toFixed(2).replace(".", ",")} €
                 </span>
+
+                {/* Eliminar */}
+                <button
+                  onClick={() => setQty(item.slug, 0)}
+                  className="text-paper/30 hover:text-paper/70 transition cursor-pointer flex-none"
+                  aria-label={`Eliminar ${item.name}`}
+                >
+                  <X size={13} />
+                </button>
               </div>
             ))}
           </div>
@@ -68,6 +103,7 @@ export function CartFab() {
           >
             Pedir →
           </button>
+
         </div>
       </div>
 
