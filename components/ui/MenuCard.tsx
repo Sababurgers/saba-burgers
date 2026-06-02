@@ -79,15 +79,17 @@ export function MenuCard({ product }: { product: MenuCardProduct }) {
           </span>
         </div>
         <p className="text-stone text-sm flex-1">{product.description}</p>
+        {product.weight && (
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone/70 mt-1">
+            {product.weight}
+          </span>
+        )}
       </div>
-      <div className="px-5 py-3 border-t border-carbon-800/8 flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone">
-          {product.weight ?? ""}
-        </span>
+      <div className="px-5 pb-5">
         <button
           onClick={handleAdd}
           className={cn(
-            "font-mono text-[11px] uppercase tracking-[0.14em] px-4 py-2 rounded-full font-semibold transition active:scale-95",
+            "w-full font-mono text-[11px] uppercase tracking-[0.14em] py-3 rounded-full font-semibold transition active:scale-95",
             added
               ? "bg-success text-paper pointer-events-none"
               : "bg-tomato hover:bg-tomato-700 text-paper"
