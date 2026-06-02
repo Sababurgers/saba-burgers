@@ -2,35 +2,26 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { MenuCard } from "@/components/ui/MenuCard";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { getFeaturedProducts } from "@/lib/data/products";
 import { REVIEWS, REVIEW_STATS } from "@/lib/data/reviews";
+import { getFeaturedProducts, getSiteSettings } from "@/lib/sanity/queries";
 
-export default function HomePage() {
-  const featured = getFeaturedProducts(3);
+export default async function HomePage() {
+  const [featured, settings] = await Promise.all([getFeaturedProducts(3), getSiteSettings()]);
 
   return (
     <>
       {/* HERO */}
       <section className="bg-carbon-800 text-paper relative overflow-hidden">
-        {/* Mobile/Tablet background stripe */}
         <div
           className="md:hidden absolute inset-0 bg-carbon-700"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(45deg, rgba(224,161,58,.06) 0 10px, transparent 10px 20px)",
-          }}
+          style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(224,161,58,.06) 0 10px, transparent 10px 20px)" }}
           aria-hidden
         />
-        {/* Mobile gradient for legibility */}
         <div
           className="md:hidden absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(15,13,11,0.55) 0%, rgba(15,13,11,0.4) 40%, rgba(15,13,11,0.92) 100%)",
-          }}
+          style={{ background: "linear-gradient(to bottom, rgba(15,13,11,0.55) 0%, rgba(15,13,11,0.4) 40%, rgba(15,13,11,0.92) 100%)" }}
           aria-hidden
         />
-        {/* Gold radial accent */}
         <div
           className="absolute -right-24 -top-20 w-[480px] h-[480px] rounded-full pointer-events-none"
           style={{ background: "radial-gradient(circle, rgba(224,161,58,.18), transparent 70%)" }}
@@ -51,12 +42,8 @@ export default function HomePage() {
               tostado en plancha. Eso es todo. Eso es Saba.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/pedido">
-                <Button size="lg">Pedir ahora →</Button>
-              </Link>
-              <Link href="/carta">
-                <Button size="lg" variant="dark-ghost">Ver carta</Button>
-              </Link>
+              <Link href="/pedido"><Button size="lg">Pedir ahora →</Button></Link>
+              <Link href="/carta"><Button size="lg" variant="dark-ghost">Ver carta</Button></Link>
             </div>
             <dl className="mt-9 pt-6 border-t border-paper/10 grid grid-cols-3 gap-6">
               <div>
@@ -73,15 +60,18 @@ export default function HomePage() {
               </div>
             </dl>
           </div>
-          {/* Desktop hero image placeholder */}
-          <div
-            className="hidden md:grid aspect-square rounded-2xl bg-carbon-700 place-items-center font-mono text-[11px] tracking-[0.18em] text-paper/60 uppercase relative"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(45deg, rgba(224,161,58,.06) 0 10px, transparent 10px 20px)",
-            }}
-          >
-            <span>Hero shot · La Saba · 4:5</span>
+          {/* Hero image */}
+          <div className="hidden md:block aspect-square rounded-2xl overflow-hidden relative">
+            {settings.heroImage ? (
+              <img src={settings.heroImage} alt="Saba Burgers" className="w-full h-full object-cover" />
+            ) : (
+              <div
+                className="w-full h-full bg-carbon-700 grid place-items-center font-mono text-[11px] tracking-[0.18em] text-paper/60 uppercase"
+                style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(224,161,58,.06) 0 10px, transparent 10px 20px)" }}
+              >
+                <span>Hero shot · La Saba · 1:1</span>
+              </div>
+            )}
             <div className="absolute right-5 top-5 w-20 h-20 rounded-full bg-gold text-carbon-800 grid place-items-center font-display text-xs leading-none text-center -rotate-12">
               HECHA<br />A MANO
             </div>
@@ -118,19 +108,12 @@ export default function HomePage() {
       {/* FEATURED */}
       <section className="bg-paper-2">
         <div className="max-w-screen-xl mx-auto px-6 md:px-8 py-16 md:py-20">
-          <SectionHeader
-            title="De la casa"
-            subtitle="Las que más piden. Si es tu primera vez, empieza por La Saba."
-          />
+          <SectionHeader title="De la casa" subtitle="Las que más piden. Si es tu primera vez, empieza por La Saba." />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {featured.map((p) => (
-              <MenuCard key={p.id} product={p} />
-            ))}
+            {featured.map((p) => <MenuCard key={p._id} product={p} />)}
           </div>
           <div className="mt-8">
-            <Link href="/carta">
-              <Button variant="ghost">Ver toda la carta →</Button>
-            </Link>
+            <Link href="/carta"><Button variant="ghost">Ver toda la carta →</Button></Link>
           </div>
         </div>
       </section>
@@ -141,19 +124,22 @@ export default function HomePage() {
           <SectionHeader title="Por qué Saba" variant="dark" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
-              ["250g", "Foto · Carne fresca", "Carne fresca, prensada al momento. Nunca congelada. Nunca pre-formada."],
-              ["15min", "Foto · Plancha caliente", "Tiempo del primer click al primer mordisco. Recogida o delivery."],
-              ["100%", "Foto · Cocina / detalle", "Pan artesanal, masa casera, salsas hechas aquí. Cada plato pasa por nuestras manos."],
-            ].map(([stat, photo, desc]) => (
+              { stat: "250g", img: settings.whySaba1, placeholder: "Carne fresca", desc: "Carne fresca, prensada al momento. Nunca congelada. Nunca pre-formada." },
+              { stat: "15min", img: settings.whySaba2, placeholder: "Plancha caliente", desc: "Tiempo del primer click al primer mordisco. Recogida o delivery." },
+              { stat: "100%", img: settings.whySaba3, placeholder: "Cocina / detalle", desc: "Pan artesanal, masa casera, salsas hechas aquí. Cada plato pasa por nuestras manos." },
+            ].map(({ stat, img, placeholder, desc }) => (
               <div key={stat} className="bg-paper/5 border border-paper/10 rounded-lg overflow-hidden flex flex-col">
-                <div
-                  className="aspect-[16/10] bg-carbon-700 grid place-items-center font-mono text-[10px] uppercase tracking-[0.18em] text-paper/30 flex-none"
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(45deg, rgba(224,161,58,.06) 0 10px, transparent 10px 20px)",
-                  }}
-                >
-                  {photo}
+                <div className="aspect-[16/10] flex-none overflow-hidden">
+                  {img ? (
+                    <img src={img} alt={placeholder} className="w-full h-full object-cover" />
+                  ) : (
+                    <div
+                      className="w-full h-full bg-carbon-700 grid place-items-center font-mono text-[10px] uppercase tracking-[0.18em] text-paper/30"
+                      style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(224,161,58,.06) 0 10px, transparent 10px 20px)" }}
+                    >
+                      {placeholder}
+                    </div>
+                  )}
                 </div>
                 <div className="p-6 flex flex-col gap-2">
                   <h4 className="font-display text-4xl text-gold leading-none">{stat}</h4>
@@ -174,18 +160,11 @@ export default function HomePage() {
           />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {REVIEWS.map((r) => (
-              <article
-                key={r.id}
-                className="bg-paper border border-carbon-800/12 rounded-lg p-6 flex flex-col gap-3.5"
-              >
-                <div className="font-display text-lg text-gold tracking-wider">
-                  {"★".repeat(r.rating)}
-                </div>
+              <article key={r.id} className="bg-paper border border-carbon-800/12 rounded-lg p-6 flex flex-col gap-3.5">
+                <div className="font-display text-lg text-gold tracking-wider">{"★".repeat(r.rating)}</div>
                 <p className="font-section font-bold text-lg leading-[1.35]">&ldquo;{r.text}&rdquo;</p>
                 <div className="flex items-center gap-2.5 mt-auto">
-                  <div className="w-8 h-8 rounded-full bg-paper-3 grid place-items-center font-display text-sm">
-                    {r.initial}
-                  </div>
+                  <div className="w-8 h-8 rounded-full bg-paper-3 grid place-items-center font-display text-sm">{r.initial}</div>
                   <b className="text-[13px]">{r.author}</b>
                   <span className="font-mono text-[11px] text-stone ml-auto">{r.date}</span>
                 </div>
@@ -202,17 +181,11 @@ export default function HomePage() {
             <h3 className="font-display text-[44px] md:text-[56px] leading-[0.95] mb-3 [text-shadow:0.075em_0.075em_0_var(--color-tomato-700)]">
               ¿Y entonces?
             </h3>
-            <p className="max-w-[42ch] opacity-90">
-              Pide por delivery o reserva una mesa. En 15 minutos tienes brasa servida.
-            </p>
+            <p className="max-w-[42ch] opacity-90">Pide por delivery o reserva una mesa. En 15 minutos tienes brasa servida.</p>
           </div>
           <div className="flex flex-wrap gap-3 md:justify-end">
-            <Link href="/pedido">
-              <Button size="lg" className="bg-paper text-tomato hover:bg-paper-2">Pedir ahora</Button>
-            </Link>
-            <Link href="/reservas">
-              <Button size="lg" variant="dark-ghost">Reservar</Button>
-            </Link>
+            <Link href="/pedido"><Button size="lg" className="bg-paper text-tomato hover:bg-paper-2">Pedir ahora</Button></Link>
+            <Link href="/reservas"><Button size="lg" variant="dark-ghost">Reservar</Button></Link>
           </div>
         </div>
       </section>

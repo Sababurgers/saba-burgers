@@ -56,6 +56,35 @@ export async function getCategories(): Promise<SanityCategory[]> {
   );
 }
 
+export interface SiteSettings {
+  heroImage?: string;
+  whySaba1?: string; whySaba2?: string; whySaba3?: string;
+  heroReservas?: string; reservasSidebar?: string;
+  heroUbicacion?: string;
+  ubicacionFoto1?: string; ubicacionFoto2?: string; ubicacionFoto3?: string;
+  heroNuestroProducto?: string;
+  npFoto1?: string; npFoto2?: string; npFoto3?: string; npFoto4?: string; npFoto5?: string;
+}
+
+const IMG = (field: string) => `"${field}": ${field}.asset->url`;
+
+export async function getSiteSettings(): Promise<SiteSettings> {
+  const result = await sanityClient.fetch(
+    `*[_type == "siteSettings"][0] {
+      ${IMG("heroImage")},
+      ${IMG("whySaba1")}, ${IMG("whySaba2")}, ${IMG("whySaba3")},
+      ${IMG("heroReservas")}, ${IMG("reservasSidebar")},
+      ${IMG("heroUbicacion")},
+      ${IMG("ubicacionFoto1")}, ${IMG("ubicacionFoto2")}, ${IMG("ubicacionFoto3")},
+      ${IMG("heroNuestroProducto")},
+      ${IMG("npFoto1")}, ${IMG("npFoto2")}, ${IMG("npFoto3")}, ${IMG("npFoto4")}, ${IMG("npFoto5")}
+    }`,
+    {},
+    { next: { revalidate: 60 } }
+  );
+  return result ?? {};
+}
+
 export async function getFeaturedProducts(limit = 3): Promise<SanityProduct[]> {
   return sanityClient.fetch(
     `*[_type == "product" && available == true && featured == true][0..${limit - 1}] {
