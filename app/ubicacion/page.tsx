@@ -29,34 +29,18 @@ export default function UbicacionPage() {
       {/* MAP + INFO */}
       <section className="bg-paper-2">
         <div className="max-w-screen-xl mx-auto px-6 md:px-8 py-10 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8">
-          {/* MAP PLACEHOLDER */}
-          <div
-            className="rounded-lg min-h-[420px] lg:min-h-[520px] relative overflow-hidden"
-            style={{
-              background: "#d6cfbe",
-              backgroundImage: `
-                linear-gradient(135deg, rgba(255,255,255,.4) 0 1px, transparent 1px 36px),
-                linear-gradient(45deg, rgba(0,0,0,.06) 0 1px, transparent 1px 28px),
-                radial-gradient(circle at 30% 40%, rgba(11,113,137,.15), transparent 35%),
-                radial-gradient(circle at 70% 70%, rgba(11,113,137,.15), transparent 30%)
-              `,
-              backgroundSize: "36px 36px, 28px 28px, auto, auto",
-            }}
-          >
-            {/* Pin */}
-            <div
-              className="absolute"
-              style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
-            >
-              <div className="w-10 h-10 rounded-full bg-tomato text-paper grid place-items-center shadow-lg">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                </svg>
-              </div>
-            </div>
-            <div className="absolute bottom-3 right-3 bg-paper/90 px-3 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-[0.14em] text-stone">
-              Mapa ilustrado · L&apos;Olleria
-            </div>
+          {/* GOOGLE MAPS EMBED */}
+          <div className="rounded-lg min-h-[420px] lg:min-h-[520px] overflow-hidden border border-carbon-800/10">
+            <iframe
+              src="https://maps.google.com/maps?q=C.+Ausi%C3%A0s+March+22%2C+46850+L%27Olleria%2C+Valencia&t=&z=17&ie=UTF8&iwloc=&output=embed"
+              width="100%"
+              height="100%"
+              style={{ border: 0, minHeight: "420px" }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Saba Burgers — C. Ausìás March 22, L'Olleria"
+            />
           </div>
 
           {/* INFO CARD */}
