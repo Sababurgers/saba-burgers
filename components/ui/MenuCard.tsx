@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/lib/cart/store";
-import type { Product } from "@/lib/data/products";
+export interface MenuCardProduct {
+  slug: string;
+  name: string;
+  price: number;
+  weight?: string;
+  description?: string;
+  badge?: string | null;
+  imageUrl?: string;
+}
 
 const BADGE_STYLES: Record<string, string> = {
   popular:  "bg-tomato text-paper",
@@ -25,7 +33,7 @@ const BADGE_LABEL: Record<string, string> = {
   veggie:   "Veggie",
 };
 
-export function MenuCard({ product }: { product: Product }) {
+export function MenuCard({ product }: { product: MenuCardProduct }) {
   const addItem = useCartStore((s) => s.addItem);
   const [added, setAdded] = useState(false);
 
@@ -37,13 +45,21 @@ export function MenuCard({ product }: { product: Product }) {
 
   return (
     <article className="bg-paper border border-carbon-800/12 rounded-lg overflow-hidden flex flex-col">
-      <div
-        className="aspect-[4/3] bg-paper-3 relative grid items-end p-3 font-mono text-[11px] tracking-[0.18em] text-stone uppercase"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(45deg, rgba(0,0,0,.04) 0 6px, transparent 6px 12px)",
-        }}
-      >
+      <div className="aspect-[4/3] bg-paper-3 relative overflow-hidden">
+        {product.imageUrl ? (
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div
+            className="w-full h-full grid items-end p-3 font-mono text-[11px] tracking-[0.18em] text-stone uppercase"
+            style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,.04) 0 6px, transparent 6px 12px)" }}
+          >
+            <span>{product.name}</span>
+          </div>
+        )}
         {product.badge && (
           <span
             className={cn(
@@ -54,7 +70,6 @@ export function MenuCard({ product }: { product: Product }) {
             {BADGE_LABEL[product.badge] ?? product.badge}
           </span>
         )}
-        <span>{product.name} · 4:3</span>
       </div>
       <div className="p-5 flex flex-col gap-2 flex-1">
         <div className="flex items-baseline justify-between gap-3">

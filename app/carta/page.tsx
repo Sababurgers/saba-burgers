@@ -1,14 +1,24 @@
 import { MenuCard } from "@/components/ui/MenuCard";
-import { CATEGORIES, getProductsByCategory } from "@/lib/data/products";
+import { getProducts, getCategories } from "@/lib/sanity/queries";
 
 export const metadata = {
   title: "Carta — Saba Burgers",
   description: "Smashburgers, acompañamientos, veggies, postres y bebidas. La carta completa de Saba Burgers.",
 };
 
+const CATEGORY_DESC: Record<string, string> = {
+  smashburgers:  "Carne fresca prensada al momento sobre plancha de hierro. 250–320 g.",
+  "para-compartir": "Para compartir o no. Por norma general, no.",
+  veggies:       "Sin carne, sin atajos. Misma cocina, distinta receta.",
+  postres:       "Para cerrar la noche. Recetas caseras, hechas en el día.",
+  bebidas:       "Refrescos, cervezas de barril y algún capricho.",
+};
+
 const BG_BY_INDEX = ["bg-paper", "bg-paper-2", "bg-paper", "bg-paper-2", "bg-paper"];
 
-export default function CartaPage() {
+export default async function CartaPage() {
+  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
+
   return (
     <>
       {/* HERO */}
@@ -22,50 +32,45 @@ export default function CartaPage() {
             Carta
           </h1>
           <p className="text-paper/80 max-w-[50ch]">
-            {CATEGORIES.length} categorías. Cuatro principales que sí o sí tienes que probar.
+            {categories.length} categorías. Cuatro principales que sí o sí tienes que probar.
           </p>
         </div>
       </section>
 
-      {/* TABS — sticky debajo del header (68px de altura aprox) */}
-      <nav
-        className="bg-paper border-b border-carbon-800/12 sticky top-[68px] z-20"
-        aria-label="Categorías de la carta"
-      >
+      {/* TABS */}
+      <nav className="bg-paper border-b border-carbon-800/12 sticky top-[68px] z-20" aria-label="Categorías de la carta">
         <div className="max-w-screen-xl mx-auto px-6 md:px-8 py-3.5 flex gap-6 items-center overflow-x-auto no-scrollbar">
-          {CATEGORIES.map((cat, i) => (
+          {categories.map((cat, i) => (
             <a
-              key={cat.id}
-              href={`#${cat.id}`}
+              key={cat.slug}
+              href={`#${cat.slug}`}
               className={`relative font-mono text-[11px] uppercase tracking-[0.18em] py-2 flex-none transition-colors ${
                 i === 0 ? "text-carbon-800" : "text-stone hover:text-carbon-800"
               }`}
             >
-              {cat.label}
-              {i === 0 && (
-                <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-tomato" />
-              )}
+              {cat.name}
+              {i === 0 && <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-tomato" />}
             </a>
           ))}
         </div>
       </nav>
 
       {/* SECTIONS */}
-      {CATEGORIES.map((cat, i) => {
-        const products = getProductsByCategory(cat.id);
-        if (products.length === 0) return null;
+      {categories.map((cat, i) => {
+        const catProducts = products.filter((p) => p.category === cat.slug);
+        if (catProducts.length === 0) return null;
         return (
-          <section key={cat.id} id={cat.id} className={BG_BY_INDEX[i] ?? "bg-paper"}>
+          <section key={cat.slug} id={cat.slug} className={BG_BY_INDEX[i] ?? "bg-paper"}>
             <div className="max-w-screen-xl mx-auto px-6 md:px-8 py-12 md:py-14">
               <header className="mb-7">
                 <h3 className="font-display text-[36px] md:text-[42px] leading-none mb-2 [text-shadow:0.07em_0.07em_0_var(--color-gold-700)]">
-                  {cat.label}
+                  {cat.name}
                 </h3>
-                <p className="text-stone max-w-[50ch]">{cat.description}</p>
+                <p className="text-stone max-w-[50ch]">{CATEGORY_DESC[cat.slug] ?? ""}</p>
               </header>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                {products.map((p) => (
-                  <MenuCard key={p.id} product={p} />
+                {catProducts.map((p) => (
+                  <MenuCard key={p._id} product={p} />
                 ))}
               </div>
             </div>
