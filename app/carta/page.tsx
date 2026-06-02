@@ -1,4 +1,5 @@
 import { MenuCard } from "@/components/ui/MenuCard";
+import { CartaTabs } from "@/components/ui/CartaTabs";
 import { getProducts, getCategories } from "@/lib/sanity/queries";
 
 export const metadata = {
@@ -38,22 +39,7 @@ export default async function CartaPage() {
       </section>
 
       {/* TABS */}
-      <nav className="bg-paper border-b border-carbon-800/12 sticky top-[68px] z-20" aria-label="Categorías de la carta">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-8 py-3.5 flex gap-6 items-center overflow-x-auto no-scrollbar">
-          {categories.map((cat, i) => (
-            <a
-              key={cat.slug}
-              href={`#${cat.slug}`}
-              className={`relative font-mono text-[11px] uppercase tracking-[0.18em] py-2 flex-none transition-colors ${
-                i === 0 ? "text-carbon-800" : "text-stone hover:text-carbon-800"
-              }`}
-            >
-              {cat.name}
-              {i === 0 && <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-tomato" />}
-            </a>
-          ))}
-        </div>
-      </nav>
+      <CartaTabs categories={categories} />
 
       {/* SECTIONS */}
       {categories.map((cat, i) => {
