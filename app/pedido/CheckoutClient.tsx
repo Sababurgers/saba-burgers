@@ -85,37 +85,29 @@ export function CheckoutClient() {
           </h4>
           <div className="flex flex-col">
             {items.map((item) => (
-              <div key={item.slug} className="flex items-center gap-3.5 py-3 border-t border-carbon-800/8 first:border-t-0">
+              <div key={item.slug} className="flex items-center gap-3 py-3 border-t border-carbon-800/8 first:border-t-0">
                 <div
-                  className="w-16 h-16 rounded-md bg-paper-3 flex-none"
-                  style={{
-                    backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,.04) 0 6px, transparent 6px 12px)",
-                  }}
+                  className="w-12 h-12 rounded-md bg-paper-3 flex-none"
+                  style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,.04) 0 6px, transparent 6px 12px)" }}
                 />
                 <div className="flex-1 min-w-0">
-                  <b className="font-section text-[15px]">{item.name}</b>
-                  {item.weight && (
-                    <span className="block text-stone text-xs">{item.weight}</span>
-                  )}
+                  <b className="font-section text-sm block truncate">{item.name}</b>
+                  <span className="font-mono text-xs text-stone">{fmt(item.price)}</span>
                 </div>
-                <div className="flex items-center gap-2 bg-paper-3 rounded-full px-2 py-1 font-mono text-[13px]">
+                <div className="flex items-center gap-1.5 bg-paper-3 rounded-full px-2 py-1 font-mono text-[13px] flex-none">
                   <button
                     onClick={() => setQty(item.slug, item.qty - 1)}
                     className="w-5 h-5 grid place-items-center hover:text-tomato transition cursor-pointer"
                     aria-label="Quitar uno"
-                  >
-                    −
-                  </button>
-                  <span className="min-w-[1ch] text-center">{item.qty}</span>
+                  >−</button>
+                  <span className="w-4 text-center">{item.qty}</span>
                   <button
                     onClick={() => setQty(item.slug, item.qty + 1)}
                     className="w-5 h-5 grid place-items-center hover:text-tomato transition cursor-pointer"
                     aria-label="Sumar uno"
-                  >
-                    +
-                  </button>
+                  >+</button>
                 </div>
-                <span className="font-mono text-sm w-20 text-right flex-none">
+                <span className="font-mono text-sm text-right flex-none">
                   {fmt(item.price * item.qty)}
                 </span>
               </div>
