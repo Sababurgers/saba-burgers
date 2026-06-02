@@ -41,13 +41,15 @@ export function CartaTabs({ categories }: { categories: Category[] }) {
           <button
             key={cat.slug}
             onClick={() => handleClick(cat.slug)}
-            className={`relative font-mono text-[11px] uppercase tracking-[0.18em] py-2 flex-none transition-colors ${
-              active === cat.slug ? "text-carbon-800" : "text-stone hover:text-carbon-800"
+            className={`relative font-mono text-[11px] uppercase tracking-[0.18em] py-2 px-3 -mx-3 rounded-md flex-none transition-colors cursor-pointer ${
+              active === cat.slug
+                ? "text-carbon-800 font-bold"
+                : "text-stone hover:text-carbon-800 hover:bg-carbon-800/5"
             }`}
           >
             {cat.name}
             {active === cat.slug && (
-              <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-tomato" />
+              <span className="absolute left-3 right-3 bottom-0 h-0.5 bg-tomato" />
             )}
           </button>
         ))}
