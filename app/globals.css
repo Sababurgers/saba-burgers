@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────
+   SABA · Brasa Design Tokens
+   Cambiar acá = cambia en todo el sitio
+───────────────────────────────────────────────────────── */
+@theme {
+  /* Carbón (foreground / dark surfaces) */
+  --color-carbon-900: #0F0D0B;
+  --color-carbon-800: #1A1714;
+  --color-carbon-700: #29261F;
+  --color-carbon-600: #3a352d;
+  --color-stone:      #5a5249;
+  --color-sebo:       #8C7669;
+
+  /* Crema (light surfaces) */
+  --color-paper:      #FDFFF7;
+  --color-paper-2:    #FAF6EE;
+  --color-paper-3:    #F2EBDF;
+
+  /* Acentos */
+  --color-gold:       #E0A13A;
+  --color-gold-700:   #B97F1E;
+  --color-tomato:     #E2452B;
+  --color-tomato-700: #B73419;
+
+  /* Estados */
+  --color-success:    #2F7A3A;
+  --color-danger:     #B73419;
+
+  /* Radios */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 99px;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px rgba(26,23,20,.06);
+  --shadow-md: 0 6px 18px rgba(26,23,20,.08), 0 2px 4px rgba(26,23,20,.04);
+  --shadow-lg: 0 18px 40px rgba(26,23,20,.18), 0 4px 12px rgba(26,23,20,.10);
+
+  /* Tipografías (variables seteadas en layout.tsx) */
+  --font-display: var(--font-alfa), serif;
+  --font-section: var(--font-bricolage), serif;
+  --font-body:    var(--font-dm-sans), system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains), ui-monospace, monospace;
+}
+
+/* ─── Base ─── */
+html, body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-carbon-800);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body { font-size: 16px; line-height: 1.55; }
+
+/* ─── Wordmark refresh — Alfa Slab One con sombra carbón sistemática ─── */
+.wordmark {
+  font-family: var(--font-display);
+  color: var(--color-gold);
+  text-shadow: 0.0625em 0.0625em 0 var(--color-carbon-800);
+  line-height: .95;
+  letter-spacing: .01em;
+  display: inline-block;
+}
+.wordmark--cream {
+  color: var(--color-paper);
+  text-shadow: 0.0625em 0.0625em 0 var(--color-gold);
+}
+
+/* ─── Scroll sin scrollbar visible (tabs de la carta) ─── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* ─── Marquee ─── */
+@keyframes scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── Reduce motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
