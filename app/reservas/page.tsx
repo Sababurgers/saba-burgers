@@ -68,7 +68,7 @@ export default async function ReservasPage() {
             ))}
           </ul>
           <div className="text-paper/60 font-mono text-[11px] uppercase tracking-[0.14em]">
-            Horario: {horariosLabel(slots)} · Lun a Dom
+            Horario: {horariosLabel(slots)}
           </div>
         </aside>
       </div>

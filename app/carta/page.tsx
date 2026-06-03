@@ -31,7 +31,7 @@ export default async function CartaPage() {
         <div className="max-w-screen-xl mx-auto px-6 md:px-8 pt-8 md:pt-12 pb-8">
           <span className="inline-flex items-center gap-2 bg-paper/8 border border-paper/15 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em]">
             <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-            {horariosLabel(slots)} · Lun a Dom
+            {horariosLabel(slots)}
           </span>
           <h1 className="font-display text-[64px] md:text-[96px] leading-[0.92] text-gold mt-5 mb-3">
             Carta
