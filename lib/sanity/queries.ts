@@ -64,6 +64,7 @@ export interface SiteSettings {
   ubicacionFoto1?: string; ubicacionFoto2?: string; ubicacionFoto3?: string;
   heroNuestroProducto?: string;
   npFoto1?: string; npFoto2?: string; npFoto3?: string; npFoto4?: string; npFoto5?: string;
+  horarios?: { open: string; close: string }[];
 }
 
 const IMG = (field: string) => `"${field}": ${field}.asset->url`;
@@ -77,7 +78,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       ${IMG("heroUbicacion")},
       ${IMG("ubicacionFoto1")}, ${IMG("ubicacionFoto2")}, ${IMG("ubicacionFoto3")},
       ${IMG("heroNuestroProducto")},
-      ${IMG("npFoto1")}, ${IMG("npFoto2")}, ${IMG("npFoto3")}, ${IMG("npFoto4")}, ${IMG("npFoto5")}
+      ${IMG("npFoto1")}, ${IMG("npFoto2")}, ${IMG("npFoto3")}, ${IMG("npFoto4")}, ${IMG("npFoto5")},
+      "horarios": horarios[]{ open, close }
     }`,
     {},
     { next: { revalidate: 60 } }

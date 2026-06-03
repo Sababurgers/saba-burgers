@@ -5,7 +5,9 @@ import { SiteNav } from "./SiteNav";
 import { SiteFooter } from "./SiteFooter";
 import { CartFab } from "./CartFab";
 
-export function SiteShell({ children }: { children: React.ReactNode }) {
+interface TimeSlot { open: string; close: string; }
+
+export function SiteShell({ children, horarios }: { children: React.ReactNode; horarios?: TimeSlot[] }) {
   const pathname = usePathname();
 
   if (pathname.startsWith("/studio")) {
@@ -14,7 +16,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <SiteNav />
+      <SiteNav horarios={horarios} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <CartFab />

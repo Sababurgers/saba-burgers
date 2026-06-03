@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Alfa_Slab_One, Bricolage_Grotesque, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { SiteShell } from "@/components/layout/SiteShell";
+import { getSiteSettings } from "@/lib/sanity/queries";
 import "./globals.css";
 
 const alfa = Alfa_Slab_One({
@@ -41,14 +42,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSiteSettings();
+
   return (
     <html
       lang="es"
       className={`${alfa.variable} ${bricolage.variable} ${dmSans.variable} ${jetbrains.variable}`}
     >
       <body className="bg-paper text-carbon-800 min-h-screen flex flex-col">
-        <SiteShell>{children}</SiteShell>
+        <SiteShell horarios={settings.horarios}>{children}</SiteShell>
       </body>
     </html>
   );

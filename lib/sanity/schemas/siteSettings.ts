@@ -14,6 +14,35 @@ export const siteSettingsSchema = defineType({
   title: "Ajustes del sitio",
   type: "document",
   fields: [
+    // ─── HORARIOS ───────────────────────────────────────────
+    defineField({
+      name: "horariosSection",
+      title: "── Horarios ──────────────────",
+      type: "string",
+      readOnly: true,
+      initialValue: "",
+    }),
+    defineField({
+      name: "horarios",
+      title: "Turnos de apertura",
+      type: "array",
+      description: "Cada turno tiene hora de apertura y cierre (formato 24h, ej: 13:00)",
+      of: [
+        {
+          type: "object",
+          name: "turno",
+          title: "Turno",
+          fields: [
+            defineField({ name: "open", title: "Apertura", type: "string", placeholder: "13:00" }),
+            defineField({ name: "close", title: "Cierre", type: "string", placeholder: "16:30" }),
+          ],
+          preview: {
+            select: { title: "open", subtitle: "close" },
+          },
+        },
+      ],
+    }),
+
     // ─── HOME ───────────────────────────────────────────────
     defineField({
       name: "homeSection",

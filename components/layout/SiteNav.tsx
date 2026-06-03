@@ -17,7 +17,9 @@ const NAV = [
   { href: "/ubicacion", label: "Ubicación", icon: MapPin },
 ];
 
-export function SiteNav() {
+interface TimeSlot { open: string; close: string; }
+
+export function SiteNav({ horarios }: { horarios?: TimeSlot[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const count = useCartStore((s) => s.count());
@@ -53,7 +55,7 @@ export function SiteNav() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3 ml-auto">
-          <OpenStatus />
+          <OpenStatus horarios={horarios} />
           <Link href="/pedido">
             <Button size="sm" className="inline-flex items-center gap-1.5">
               Pedir
