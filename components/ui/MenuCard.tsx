@@ -110,12 +110,12 @@ export function MenuCard({ product }: { product: MenuCardProduct }) {
         {/* Botón añadir */}
         <button
           onClick={handleAdd}
-          disabled={added}
+          data-cart-action="add"
           className={cn(
-            "flex-1 font-mono text-[11px] uppercase tracking-[0.14em] py-3 rounded-full font-semibold transition active:scale-95 cursor-pointer",
+            "flex-1 font-mono text-[11px] uppercase tracking-[0.14em] py-3 rounded-full font-semibold transition cursor-pointer select-none",
             added
               ? "bg-success text-paper pointer-events-none"
-              : "bg-tomato hover:bg-tomato-700 text-paper"
+              : "bg-tomato hover:bg-tomato-700 active:scale-95 text-paper"
           )}
         >
           {added ? "✓ Añadido" : "Añadir"}

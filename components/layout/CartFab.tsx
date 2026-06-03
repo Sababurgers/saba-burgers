@@ -18,7 +18,10 @@ export function CartFab() {
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as HTMLElement;
+      // No cerrar si el click es en un botón de añadir al carrito
+      if (target.closest("[data-cart-action]")) return;
+      if (ref.current && !ref.current.contains(target)) setOpen(false);
     }
     if (open) document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
