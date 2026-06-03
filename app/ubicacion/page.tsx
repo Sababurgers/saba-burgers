@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { LOCATION } from "@/lib/data/locations";
+import { OpenStatus } from "@/components/ui/OpenStatus";
+import { getSiteSettings } from "@/lib/sanity/queries";
+import { BUSINESS_HOURS } from "@/lib/data/business-hours";
+
+export const revalidate = 60;
 
 export const metadata = {
   title: "Ubicación — Saba Burgers · L'Olleria, Valencia",
   description: "Encuéntranos en C. Ausìás March, 22, 46850 L'Olleria, Valencia. Take away y reservas.",
 };
 
-export default function UbicacionPage() {
+export default async function UbicacionPage() {
+  const settings = await getSiteSettings();
+  const horarios = settings.horarios?.length ? settings.horarios : BUSINESS_HOURS;
   return (
     <>
       {/* HERO */}
@@ -69,9 +76,7 @@ export default function UbicacionPage() {
                 </div>
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone">Estado</span>
-                  <span className="text-success font-mono text-[11px] uppercase tracking-[0.14em]">
-                    ● Abierto
-                  </span>
+                  <OpenStatus horarios={horarios} variant="dark" />
                 </div>
               </div>
               <div className="h-px bg-carbon-800/10" />
