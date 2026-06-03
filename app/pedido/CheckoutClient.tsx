@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/cart/store";
-import { createCheckoutSession } from "./actions";
+import { placeOrder } from "./actions";
+import type { Order } from "@/lib/types/order";
 import type { TimeSlot } from "@/lib/data/business-hours";
 
 // ─── Lógica de horarios ──────────────────────────────────────────────────────
@@ -27,28 +28,25 @@ function getStatus(horarios: TimeSlot[]) {
     return c >= o ? nowMin >= o && nowMin <= c : nowMin >= o || nowMin <= c;
   });
 
-  // Slots disponibles: todos los bloques de 30 min dentro del horario, a partir de ahora+30min
+  // Primer hueco posible: 30 min a partir de ahora, redondeado a la media hora.
   const minStart = Math.ceil((nowMin + 30) / 30) * 30;
+
+  // Mostramos UN solo rango: el turno abierto ahora o el próximo de hoy.
+  // La ventana va desde la apertura (o ahora+30) hasta media hora antes del cierre.
+  const ordered = [...horarios].sort((a, b) => toMin(a.open) - toMin(b.open));
   const slots: string[] = [];
 
-  for (const s of horarios) {
+  for (const s of ordered) {
     const open = toMin(s.open);
     const close = toMin(s.close);
-
-    if (close >= open) {
-      // Turno normal
-      for (let m = Math.max(open, minStart); m <= close; m += 30) {
-        slots.push(minToHHMM(m));
-      }
-    } else {
-      // Turno que cruza medianoche (ej: 20:00–04:00)
-      for (let m = Math.max(open, minStart); m < 24 * 60; m += 30) {
-        slots.push(minToHHMM(m));
-      }
-    }
+    if (close < open) continue; // turnos que cruzan medianoche: sin slots programados
+    const windowStart = Math.max(open, minStart);
+    const windowEnd = close - 30; // media hora antes del cierre
+    if (windowEnd < windowStart) continue; // este turno ya no da tiempo
+    for (let m = windowStart; m <= windowEnd; m += 30) slots.push(minToHHMM(m));
+    break; // solo el primer turno disponible
   }
 
-  slots.sort();
   const canOrder = isOpen || slots.length > 0;
   const nextOpen = !isOpen && slots.length > 0 ? slots[0] : null;
 
@@ -64,9 +62,20 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
   const setQty = useCartStore((s) => s.setQty);
   const clear = useCartStore((s) => s.clear);
 
+  // Recalcula el estado de apertura cada minuto para que una pestaña
+  // abierta no se quede "abierta" tras la hora de cierre.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  const { isOpen, canOrder, nextOpen, slots } = getStatus(horarios);
+
   const [method, setMethod] = useState<"delivery" | "pickup">("pickup");
   const [payMethod, setPayMethod] = useState<"online" | "local">("online");
-  const [pickupTime, setPickupTime] = useState<string>("asap");
+  // Si el local está cerrado, no puede ser "asap": arranca en el primer slot disponible.
+  const [pickupTime, setPickupTime] = useState<string>(isOpen ? "asap" : (nextOpen ?? "asap"));
   const [address, setAddress] = useState("");
   const [floor, setFloor] = useState("");
   const [notes, setNotes] = useState("");
@@ -76,7 +85,13 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { isOpen, canOrder, nextOpen, slots } = getStatus(horarios);
+  // Refs para llevar al usuario al primer campo con error (clave en móvil).
+  const timeRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLInputElement>(null);
+
   const shipping = method === "delivery" ? 2.5 : 0;
   const total = subtotal + shipping;
 
@@ -124,26 +139,55 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
     );
   }
 
+  function fail(msg: string, ref?: React.RefObject<HTMLElement | null>) {
+    setError(msg);
+    const el = ref?.current;
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (el instanceof HTMLInputElement) setTimeout(() => el.focus({ preventScroll: true }), 300);
+    }
+  }
+
+  const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
   async function handlePay() {
     setError("");
-    if (!name.trim()) { setError("Por favor, introduce tu nombre."); return; }
-    if (!email.trim()) { setError("Por favor, introduce tu email."); return; }
-    if (method === "delivery" && !address.trim()) { setError("Por favor, introduce la dirección de entrega."); return; }
+    // No se puede pedir "lo antes posible" con el local cerrado.
+    if (pickupTime === "asap" && !isOpen) {
+      return fail("Estamos cerrados. Elige una hora de recogida disponible.", timeRef);
+    }
+    // La hora elegida debe seguir siendo válida (puede caducar si pasa el tiempo).
+    if (pickupTime !== "asap" && !slots.includes(pickupTime)) {
+      return fail("Esa hora ya no está disponible. Elige otra, por favor.", timeRef);
+    }
+    if (!name.trim()) { return fail("Por favor, introduce tu nombre.", nameRef); }
+    if (!phone.trim()) { return fail("Por favor, introduce tu móvil para avisarte.", phoneRef); }
+    if (!emailOk(email)) { return fail("Introduce un email válido para el comprobante.", emailRef); }
+    if (method === "delivery" && !address.trim()) { return fail("Por favor, introduce la dirección de entrega.", addressRef); }
 
     setLoading(true);
+    const order: Order = {
+      items: items.map((i) => ({ slug: i.slug, name: i.name, price: i.price, qty: i.qty })),
+      method,
+      payMethod,
+      pickupTime,
+      customer: { name: name.trim(), phone: phone.trim(), email: email.trim() },
+      delivery: method === "delivery" ? { address: address.trim(), floor: floor.trim(), notes: notes.trim() } : undefined,
+    };
     try {
-      if (payMethod === "online") {
-        router.push("/pedido/pagando");
-        const url = await createCheckoutSession(items, method);
-        if (url) {
-          window.location.href = url;
-        } else {
-          router.push("/pedido/confirmacion");
-        }
-      } else {
-        clear();
-        router.push("/pedido/confirmacion");
+      const res = await placeOrder(order);
+      if (!res.ok) {
+        setError(res.error ?? "No se pudo completar el pedido.");
+        setLoading(false);
+        return;
       }
+      if (res.redirectUrl) {
+        window.location.href = res.redirectUrl; // a la pasarela de Stripe
+        return;
+      }
+      // Confirmado en el local o en modo demo: vaciamos el carrito.
+      clear();
+      router.push("/pedido/confirmacion");
     } catch {
       setError("Ha habido un error. Por favor, inténtalo de nuevo.");
       setLoading(false);
@@ -151,7 +195,7 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
   }
 
   return (
-    <div className="grid lg:grid-cols-[1fr_380px] gap-8">
+    <div className="grid lg:grid-cols-[1fr_380px] gap-8 pb-28 lg:pb-0">
       {/* LEFT */}
       <div className="flex flex-col gap-4">
 
@@ -223,7 +267,7 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
           </div>
 
           {/* Selector de hora */}
-          <div className="mt-5">
+          <div ref={timeRef} className="mt-5 scroll-mt-24">
             <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone block mb-2.5">
               ¿A qué hora?
             </span>
@@ -258,7 +302,7 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
           {method === "delivery" && (
             <div className="mt-4 flex flex-col gap-2.5">
               <div className="grid grid-cols-[2fr_1fr] gap-2.5">
-                <input type="text" placeholder="Calle y número *" value={address} onChange={(e) => setAddress(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
+                <input ref={addressRef} type="text" placeholder="Calle y número *" value={address} onChange={(e) => setAddress(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm scroll-mt-24 focus:outline-none focus:border-carbon-800" />
                 <input type="text" placeholder="Piso" value={floor} onChange={(e) => setFloor(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
               </div>
               <input type="text" placeholder="Notas para el repartidor (opcional)" value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
@@ -274,10 +318,10 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
           </h4>
           <div className="flex flex-col gap-2.5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-              <input type="text" placeholder="Nombre y apellidos *" value={name} onChange={(e) => setName(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
-              <input type="tel" placeholder="Móvil (+34)" value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
+              <input ref={nameRef} type="text" placeholder="Nombre y apellidos *" value={name} onChange={(e) => setName(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm scroll-mt-24 focus:outline-none focus:border-carbon-800" />
+              <input ref={phoneRef} type="tel" placeholder="Móvil (+34) *" value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm scroll-mt-24 focus:outline-none focus:border-carbon-800" />
             </div>
-            <input type="email" placeholder="Email para el comprobante *" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
+            <input ref={emailRef} type="email" placeholder="Email para el comprobante *" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm scroll-mt-24 focus:outline-none focus:border-carbon-800" />
             <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone mt-2">Método de pago</span>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               {[
@@ -328,15 +372,37 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
         <button
           onClick={handlePay}
           disabled={loading}
-          className="mt-4 w-full bg-tomato hover:bg-tomato-700 disabled:opacity-60 disabled:cursor-not-allowed transition text-paper font-mono text-xs uppercase tracking-[0.14em] py-3.5 rounded-full font-semibold cursor-pointer"
+          className="hidden lg:block mt-4 w-full bg-tomato hover:bg-tomato-700 disabled:opacity-60 disabled:cursor-not-allowed transition text-paper font-mono text-xs uppercase tracking-[0.14em] py-3.5 rounded-full font-semibold cursor-pointer"
         >
           {loading ? "Procesando…" : payMethod === "local" ? "Finalizar pedido →" : "Pagar →"}
         </button>
 
         {payMethod === "online" && (
-          <p className="mt-3 text-xs text-paper/60 text-center">Pago seguro con Stripe</p>
+          <p className="hidden lg:block mt-3 text-xs text-paper/60 text-center">Pago seguro con Stripe</p>
         )}
       </aside>
+
+      {/* Barra de pago fija — solo móvil */}
+      <div className="fixed bottom-0 inset-x-0 z-30 lg:hidden bg-carbon-800/95 backdrop-blur border-t border-carbon-700 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        {error && (
+          <p className="mb-2 text-xs text-paper bg-tomato/90 rounded-md px-3 py-2">
+            {error}
+          </p>
+        )}
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col leading-tight">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/50">Total</span>
+            <span className="font-display text-xl text-gold">{fmt(total)}</span>
+          </div>
+          <button
+            onClick={handlePay}
+            disabled={loading}
+            className="flex-1 bg-tomato hover:bg-tomato-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed transition text-paper font-mono text-xs uppercase tracking-[0.14em] py-3.5 rounded-full font-semibold cursor-pointer"
+          >
+            {loading ? "Procesando…" : payMethod === "local" ? "Finalizar pedido →" : "Pagar →"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

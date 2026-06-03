@@ -31,17 +31,22 @@ export async function POST(req: NextRequest) {
       const resend = new Resend(resendKey);
 
       const total = session.amount_total ? (session.amount_total / 100).toFixed(2).replace(".", ",") + " €" : "—";
+      const m = session.metadata ?? {};
+      const when = m.pickupTime === "asap" || !m.pickupTime ? "Lo antes posible" : m.pickupTime;
+      const how = m.method === "delivery" ? "Delivery" : "Recoger en local";
 
       await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? "reservas@sababurgers.es",
         to: process.env.RESEND_TO_EMAIL ?? "hola@sababurgers.es",
-        subject: `[Pedido pagado] ${session.id.slice(-6)} · ${total}`,
+        subject: `[Pedido pagado] ${m.name ?? session.id.slice(-6)} · ${total}`,
         html: `
           <div style="font-family:sans-serif;color:#1c1814">
             <h2>Nuevo pedido pagado ✓</h2>
-            <p>ID Stripe: <code>${session.id}</code></p>
+            <p><strong>${how}</strong> · ${when}</p>
+            <p>Cliente: ${m.name ?? "—"}${m.phone ? ` · ${m.phone}` : ""}</p>
             <p>Total: <strong>${total}</strong></p>
             <p>Email cliente: ${session.customer_email}</p>
+            <p style="color:#5a5249;font-size:12px">ID Stripe: <code>${session.id}</code></p>
           </div>
         `,
       });

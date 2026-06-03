@@ -67,8 +67,8 @@ export function checkOpenStatus(slots: TimeSlot[]): { isOpen: boolean; closeTime
   return { isOpen: !!slot, closeTime: slot?.close ?? null };
 }
 
-export function isTimeWithinHours(time: string): boolean {
+export function isTimeWithinHours(time: string, slots: TimeSlot[] = BUSINESS_HOURS): boolean {
   if (!time) return false;
   const nowMin = toMinutes(time);
-  return BUSINESS_HOURS.some((s) => isWithinSlot(nowMin, s));
+  return slots.some((s) => isWithinSlot(nowMin, s));
 }
