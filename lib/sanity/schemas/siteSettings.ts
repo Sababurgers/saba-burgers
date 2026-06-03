@@ -1,10 +1,21 @@
 import { defineField, defineType } from "sanity";
 
-const imageField = (name: string, title: string) =>
+const DAYS = [
+  { title: "Lunes", value: "lun" },
+  { title: "Martes", value: "mar" },
+  { title: "Miércoles", value: "mie" },
+  { title: "Jueves", value: "jue" },
+  { title: "Viernes", value: "vie" },
+  { title: "Sábado", value: "sab" },
+  { title: "Domingo", value: "dom" },
+];
+
+const imageField = (name: string, title: string, group: string) =>
   defineField({
     name,
     title,
     type: "image",
+    group,
     options: { hotspot: true },
     fields: [defineField({ name: "alt", title: "Texto alternativo", type: "string" })],
   });
@@ -13,20 +24,21 @@ export const siteSettingsSchema = defineType({
   name: "siteSettings",
   title: "Ajustes del sitio",
   type: "document",
+  groups: [
+    { name: "horarios", title: "🕐 Horarios" },
+    { name: "home", title: "🏠 Home" },
+    { name: "reservas", title: "📅 Reservas" },
+    { name: "ubicacion", title: "📍 Ubicación" },
+    { name: "nuestroProducto", title: "🍔 Nuestro Producto" },
+  ],
   fields: [
     // ─── HORARIOS ───────────────────────────────────────────
-    defineField({
-      name: "horariosSection",
-      title: "── Horarios ──────────────────",
-      type: "string",
-      readOnly: true,
-      initialValue: "",
-    }),
     defineField({
       name: "horarios",
       title: "Turnos de apertura",
       type: "array",
-      description: "Cada turno tiene hora de apertura y cierre (formato 24h, ej: 13:00)",
+      group: "horarios",
+      description: "Añade un turno por cada franja horaria. Formato 24h (ej: 13:00).",
       of: [
         {
           type: "object",
@@ -34,74 +46,68 @@ export const siteSettingsSchema = defineType({
           title: "Turno",
           fields: [
             defineField({
-              name: "open", title: "Apertura (24h)", type: "string",
-              placeholder: "13:00",
-              validation: (R) => R.required().regex(/^([01]\d|2[0-3]):[0-5]\d$/, { name: "formato", invert: false }).error("Formato incorrecto. Usa HH:MM en 24h, ej: 13:00"),
+              name: "days",
+              title: "Días",
+              type: "array",
+              of: [{ type: "string" }],
+              options: { list: DAYS, layout: "grid" },
+              description: "Días de la semana en que aplica este turno",
             }),
             defineField({
-              name: "close", title: "Cierre (24h)", type: "string",
+              name: "open",
+              title: "Apertura",
+              type: "string",
+              placeholder: "13:00",
+              validation: (R) =>
+                R.required()
+                  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, { name: "fmt", invert: false })
+                  .error("Usa formato HH:MM en 24h, ej: 13:00"),
+            }),
+            defineField({
+              name: "close",
+              title: "Cierre",
+              type: "string",
               placeholder: "16:30",
-              validation: (R) => R.required().regex(/^([01]\d|2[0-3]):[0-5]\d$/, { name: "formato", invert: false }).error("Formato incorrecto. Usa HH:MM en 24h, ej: 16:30"),
+              validation: (R) =>
+                R.required()
+                  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, { name: "fmt", invert: false })
+                  .error("Usa formato HH:MM en 24h, ej: 16:30"),
             }),
           ],
           preview: {
-            select: { title: "open", subtitle: "close" },
+            select: { open: "open", close: "close", days: "days" },
+            prepare({ open, close, days }: { open?: string; close?: string; days?: string[] }) {
+              const daysStr = days?.join(", ") ?? "Todos los días";
+              return { title: `${open ?? "?"} – ${close ?? "?"}`, subtitle: daysStr };
+            },
           },
         },
       ],
     }),
 
     // ─── HOME ───────────────────────────────────────────────
-    defineField({
-      name: "homeSection",
-      title: "── Home ──────────────────────",
-      type: "string",
-      readOnly: true,
-      initialValue: "",
-    }),
-    imageField("heroImage", "Hero — Foto principal (derecha del título)"),
-    imageField("whySaba1", "Por qué Saba — Foto 1 (Carne fresca)"),
-    imageField("whySaba2", "Por qué Saba — Foto 2 (Plancha caliente)"),
-    imageField("whySaba3", "Por qué Saba — Foto 3 (Cocina / detalle)"),
+    imageField("heroImage", "Foto principal (derecha del título)", "home"),
+    imageField("whySaba1", "Por qué Saba — Foto 1 (Carne fresca)", "home"),
+    imageField("whySaba2", "Por qué Saba — Foto 2 (Plancha caliente)", "home"),
+    imageField("whySaba3", "Por qué Saba — Foto 3 (Cocina / detalle)", "home"),
 
     // ─── RESERVAS ───────────────────────────────────────────
-    defineField({
-      name: "reservasSection",
-      title: "── Reservas ──────────────────",
-      type: "string",
-      readOnly: true,
-      initialValue: "",
-    }),
-    imageField("heroReservas", "Reservas — Fondo del hero (opcional)"),
-    imageField("reservasSidebar", "Reservas — Foto del lateral"),
+    imageField("heroReservas", "Fondo del hero (opcional)", "reservas"),
+    imageField("reservasSidebar", "Foto del lateral", "reservas"),
 
     // ─── UBICACIÓN ──────────────────────────────────────────
-    defineField({
-      name: "ubicacionSection",
-      title: "── Ubicación ─────────────────",
-      type: "string",
-      readOnly: true,
-      initialValue: "",
-    }),
-    imageField("heroUbicacion", "Ubicación — Fondo del hero (opcional)"),
-    imageField("ubicacionFoto1", "Ubicación — Galería foto 1 (Fachada)"),
-    imageField("ubicacionFoto2", "Ubicación — Galería foto 2 (Interior)"),
-    imageField("ubicacionFoto3", "Ubicación — Galería foto 3 (Detalle)"),
+    imageField("heroUbicacion", "Fondo del hero (opcional)", "ubicacion"),
+    imageField("ubicacionFoto1", "Galería — Foto 1 (Fachada)", "ubicacion"),
+    imageField("ubicacionFoto2", "Galería — Foto 2 (Interior)", "ubicacion"),
+    imageField("ubicacionFoto3", "Galería — Foto 3 (Detalle)", "ubicacion"),
 
     // ─── NUESTRO PRODUCTO ───────────────────────────────────
-    defineField({
-      name: "nuestroProductoSection",
-      title: "── Nuestro Producto ──────────",
-      type: "string",
-      readOnly: true,
-      initialValue: "",
-    }),
-    imageField("heroNuestroProducto", "Nuestro Producto — Fondo del hero"),
-    imageField("npFoto1", "Nuestro Producto — Galería foto 1"),
-    imageField("npFoto2", "Nuestro Producto — Galería foto 2"),
-    imageField("npFoto3", "Nuestro Producto — Galería foto 3"),
-    imageField("npFoto4", "Nuestro Producto — Galería foto 4"),
-    imageField("npFoto5", "Nuestro Producto — Galería foto 5"),
+    imageField("heroNuestroProducto", "Fondo del hero", "nuestroProducto"),
+    imageField("npFoto1", "Galería — Foto 1", "nuestroProducto"),
+    imageField("npFoto2", "Galería — Foto 2", "nuestroProducto"),
+    imageField("npFoto3", "Galería — Foto 3", "nuestroProducto"),
+    imageField("npFoto4", "Galería — Foto 4", "nuestroProducto"),
+    imageField("npFoto5", "Galería — Foto 5", "nuestroProducto"),
   ],
   preview: {
     prepare: () => ({ title: "Ajustes del sitio" }),
