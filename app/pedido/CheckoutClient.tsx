@@ -22,12 +22,22 @@ export function CheckoutClient() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const shipping = method === "delivery" ? 2.5 : 0;
   const total = subtotal + shipping;
 
   function fmt(n: number) {
     return n.toFixed(2).replace(".", ",") + " €";
+  }
+
+  function stepStyle(step: number) {
+    const filled = (step === 1 && items.length > 0) ||
+      (step === 2 && (method === "pickup" || address.trim())) ||
+      (step === 3 && name.trim() && email.trim());
+    return filled
+      ? "bg-success text-paper"
+      : "bg-carbon-800/15 text-carbon-800";
   }
 
   if (items.length === 0) {
@@ -40,7 +50,7 @@ export function CheckoutClient() {
         </p>
         <Link
           href="/carta"
-          className="inline-block bg-tomato hover:bg-tomato-700 transition text-paper font-mono text-xs uppercase tracking-[0.14em] px-6 py-3.5 rounded-full font-semibold"
+          className="inline-block bg-tomato hover:bg-tomato-700 transition text-paper font-mono text-xs uppercase tracking-[0.14em] px-6 py-3.5 rounded-full font-semibold cursor-pointer"
         >
           Ver la carta →
         </Link>
@@ -49,10 +59,11 @@ export function CheckoutClient() {
   }
 
   async function handlePay() {
-    if (!name.trim() || !email.trim()) {
-      alert("Por favor, completa tu nombre y email.");
-      return;
-    }
+    setError("");
+    if (!name.trim()) { setError("Por favor, introduce tu nombre."); return; }
+    if (!email.trim()) { setError("Por favor, introduce tu email."); return; }
+    if (method === "delivery" && !address.trim()) { setError("Por favor, introduce la dirección de entrega."); return; }
+
     setLoading(true);
     try {
       if (payMethod === "online") {
@@ -68,7 +79,7 @@ export function CheckoutClient() {
         router.push("/pedido/confirmacion");
       }
     } catch {
-      alert("Ha habido un error. Por favor, inténtalo de nuevo.");
+      setError("Ha habido un error. Por favor, inténtalo de nuevo.");
       setLoading(false);
     }
   }
@@ -80,7 +91,7 @@ export function CheckoutClient() {
         {/* STEP 1 — items */}
         <section className="bg-paper border border-carbon-800/12 rounded-lg p-6">
           <h4 className="flex items-center gap-2.5 font-section font-bold text-lg mb-4">
-            <span className="w-7 h-7 rounded-full grid place-items-center font-display text-sm leading-none bg-success text-paper">1</span>
+            <span className={`w-7 h-7 rounded-full grid place-items-center font-display text-sm leading-none transition-colors ${stepStyle(1)}`}>1</span>
             Tu pedido
           </h4>
           <div className="flex flex-col">
@@ -95,28 +106,15 @@ export function CheckoutClient() {
                   <span className="font-mono text-xs text-stone">{fmt(item.price)}</span>
                 </div>
                 <div className="flex items-center gap-1.5 bg-paper-3 rounded-full px-2 py-1 font-mono text-[13px] flex-none">
-                  <button
-                    onClick={() => setQty(item.slug, item.qty - 1)}
-                    className="w-5 h-5 grid place-items-center hover:text-tomato transition cursor-pointer"
-                    aria-label="Quitar uno"
-                  >−</button>
+                  <button onClick={() => setQty(item.slug, item.qty - 1)} className="w-5 h-5 grid place-items-center hover:text-tomato transition cursor-pointer" aria-label="Quitar uno">−</button>
                   <span className="w-4 text-center">{item.qty}</span>
-                  <button
-                    onClick={() => setQty(item.slug, item.qty + 1)}
-                    className="w-5 h-5 grid place-items-center hover:text-tomato transition cursor-pointer"
-                    aria-label="Sumar uno"
-                  >+</button>
+                  <button onClick={() => setQty(item.slug, item.qty + 1)} className="w-5 h-5 grid place-items-center hover:text-tomato transition cursor-pointer" aria-label="Sumar uno">+</button>
                 </div>
-                <span className="font-mono text-sm text-right flex-none">
-                  {fmt(item.price * item.qty)}
-                </span>
+                <span className="font-mono text-sm text-right flex-none">{fmt(item.price * item.qty)}</span>
               </div>
             ))}
           </div>
-          <Link
-            href="/carta"
-            className="mt-3 inline-block font-mono text-[11px] uppercase tracking-[0.14em] text-tomato hover:text-tomato-700 transition"
-          >
+          <Link href="/carta" className="mt-3 inline-block font-mono text-[11px] uppercase tracking-[0.14em] text-tomato hover:text-tomato-700 transition cursor-pointer">
             + Añadir otro
           </Link>
         </section>
@@ -124,72 +122,28 @@ export function CheckoutClient() {
         {/* STEP 2 — método */}
         <section className="bg-paper border border-carbon-800/12 rounded-lg p-6">
           <h4 className="flex items-center gap-2.5 font-section font-bold text-lg mb-4">
-            <span className="w-7 h-7 rounded-full grid place-items-center font-display text-sm leading-none bg-carbon-800 text-gold">2</span>
+            <span className={`w-7 h-7 rounded-full grid place-items-center font-display text-sm leading-none transition-colors ${stepStyle(2)}`}>2</span>
             ¿Cómo lo quieres?
           </h4>
           <div className="grid grid-cols-2 gap-2.5">
-            <label
-              className={`block border-[1.5px] rounded-md p-3.5 cursor-pointer transition ${
-                method === "delivery"
-                  ? "border-tomato bg-tomato/5"
-                  : "border-carbon-800/12 hover:border-carbon-800/30"
-              }`}
-            >
-              <input
-                type="radio"
-                name="method"
-                value="delivery"
-                checked={method === "delivery"}
-                onChange={() => setMethod("delivery")}
-                className="sr-only"
-              />
-              <b className="block text-sm">🛵 Delivery</b>
-              <span className="text-stone text-xs">Llega en 25–35 min</span>
-            </label>
-            <label
-              className={`block border-[1.5px] rounded-md p-3.5 cursor-pointer transition ${
-                method === "pickup"
-                  ? "border-tomato bg-tomato/5"
-                  : "border-carbon-800/12 hover:border-carbon-800/30"
-              }`}
-            >
-              <input
-                type="radio"
-                name="method"
-                value="pickup"
-                checked={method === "pickup"}
-                onChange={() => setMethod("pickup")}
-                className="sr-only"
-              />
-              <b className="block text-sm">📍 Recoger en local</b>
-              <span className="text-stone text-xs">Listo en 12 min</span>
-            </label>
+            {[
+              { value: "pickup", label: "📍 Recoger en local", sub: "Listo en 12 min" },
+              { value: "delivery", label: "🛵 Delivery", sub: "Llega en 25–35 min" },
+            ].map((opt) => (
+              <label key={opt.value} className={`block border-[1.5px] rounded-md p-3.5 cursor-pointer transition ${method === opt.value ? "border-tomato bg-tomato/5" : "border-carbon-800/12 hover:border-carbon-800/30"}`}>
+                <input type="radio" name="method" value={opt.value} checked={method === opt.value} onChange={() => setMethod(opt.value as "delivery" | "pickup")} className="sr-only" />
+                <b className="block text-sm">{opt.label}</b>
+                <span className="text-stone text-xs">{opt.sub}</span>
+              </label>
+            ))}
           </div>
           {method === "delivery" && (
             <div className="mt-4 flex flex-col gap-2.5">
               <div className="grid grid-cols-[2fr_1fr] gap-2.5">
-                <input
-                  type="text"
-                  placeholder="Calle y número"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800"
-                />
-                <input
-                  type="text"
-                  placeholder="Piso"
-                  value={floor}
-                  onChange={(e) => setFloor(e.target.value)}
-                  className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800"
-                />
+                <input type="text" placeholder="Calle y número *" value={address} onChange={(e) => setAddress(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
+                <input type="text" placeholder="Piso" value={floor} onChange={(e) => setFloor(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
               </div>
-              <input
-                type="text"
-                placeholder="Notas para el repartidor (opcional)"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="w-full bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800"
-              />
+              <input type="text" placeholder="Notas para el repartidor (opcional)" value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
             </div>
           )}
         </section>
@@ -197,78 +151,27 @@ export function CheckoutClient() {
         {/* STEP 3 — datos y pago */}
         <section className="bg-paper border border-carbon-800/12 rounded-lg p-6">
           <h4 className="flex items-center gap-2.5 font-section font-bold text-lg mb-4">
-            <span className="w-7 h-7 rounded-full grid place-items-center font-display text-sm leading-none bg-carbon-800 text-gold">3</span>
+            <span className={`w-7 h-7 rounded-full grid place-items-center font-display text-sm leading-none transition-colors ${stepStyle(3)}`}>3</span>
             Datos y pago
           </h4>
           <div className="flex flex-col gap-2.5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-              <input
-                type="text"
-                placeholder="Nombre y apellidos"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800"
-                required
-              />
-              <input
-                type="tel"
-                placeholder="Móvil (+34)"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800"
-              />
+              <input type="text" placeholder="Nombre y apellidos *" value={name} onChange={(e) => setName(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
+              <input type="tel" placeholder="Móvil (+34)" value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
             </div>
-            <input
-              type="email"
-              placeholder="Email para el comprobante"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800"
-              required
-            />
-
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone mt-2">
-              Método de pago
-            </span>
+            <input type="email" placeholder="Email para el comprobante *" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-paper-2 border border-carbon-800/12 rounded-md px-3.5 py-3 text-sm focus:outline-none focus:border-carbon-800" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone mt-2">Método de pago</span>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-              <label
-                className={`block border-[1.5px] rounded-md p-3.5 cursor-pointer transition ${
-                  payMethod === "online"
-                    ? "border-tomato bg-tomato/5"
-                    : "border-carbon-800/12 hover:border-carbon-800/30"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="pay"
-                  value="online"
-                  checked={payMethod === "online"}
-                  onChange={() => setPayMethod("online")}
-                  className="sr-only"
-                />
-                <b className="block text-sm">💳 Online</b>
-                <span className="text-stone text-xs">
-                  Tarjeta, Bizum o Apple Pay · seguro con Stripe
-                </span>
-              </label>
-              <label
-                className={`block border-[1.5px] rounded-md p-3.5 cursor-pointer transition ${
-                  payMethod === "local"
-                    ? "border-tomato bg-tomato/5"
-                    : "border-carbon-800/12 hover:border-carbon-800/30"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="pay"
-                  value="local"
-                  checked={payMethod === "local"}
-                  onChange={() => setPayMethod("local")}
-                  className="sr-only"
-                />
-                <b className="block text-sm">💶 En el local</b>
-                <span className="text-stone text-xs">Efectivo o tarjeta al recoger</span>
-              </label>
+              {[
+                { value: "online", label: "💳 Online", sub: "Tarjeta, Bizum o Apple Pay · seguro con Stripe" },
+                { value: "local", label: "💶 En el local", sub: "Efectivo o tarjeta al recoger" },
+              ].map((opt) => (
+                <label key={opt.value} className={`block border-[1.5px] rounded-md p-3.5 cursor-pointer transition ${payMethod === opt.value ? "border-tomato bg-tomato/5" : "border-carbon-800/12 hover:border-carbon-800/30"}`}>
+                  <input type="radio" name="pay" value={opt.value} checked={payMethod === opt.value} onChange={() => setPayMethod(opt.value as "online" | "local")} className="sr-only" />
+                  <b className="block text-sm">{opt.label}</b>
+                  <span className="text-stone text-xs">{opt.sub}</span>
+                </label>
+              ))}
             </div>
           </div>
         </section>
@@ -289,16 +192,24 @@ export function CheckoutClient() {
           <span>Total</span>
           <span>{fmt(total)}</span>
         </div>
+
+        {error && (
+          <p className="mt-4 text-xs text-tomato bg-tomato/10 border border-tomato/20 rounded-md px-3 py-2">
+            {error}
+          </p>
+        )}
+
         <button
           onClick={handlePay}
           disabled={loading}
-          className="mt-5 w-full bg-tomato hover:bg-tomato-700 disabled:opacity-60 disabled:cursor-not-allowed transition text-paper font-mono text-xs uppercase tracking-[0.14em] py-3.5 rounded-full font-semibold cursor-pointer"
+          className="mt-4 w-full bg-tomato hover:bg-tomato-700 disabled:opacity-60 disabled:cursor-not-allowed transition text-paper font-mono text-xs uppercase tracking-[0.14em] py-3.5 rounded-full font-semibold cursor-pointer"
         >
-          {loading ? "Procesando…" : "Pagar →"}
+          {loading ? "Procesando…" : payMethod === "local" ? "Finalizar pedido →" : "Pagar →"}
         </button>
         <p className="mt-3 text-xs text-paper/60 text-center">
-          {method === "delivery" ? "Llegada estimada: ~30 min · " : "Listo en: ~12 min · "}
-          Pago seguro
+          {payMethod === "online"
+            ? (method === "delivery" ? "Llegada estimada: ~30 min · " : "Listo en: ~12 min · ") + "Pago seguro"
+            : method === "delivery" ? "Llegada estimada: ~30 min" : "Listo en: ~12 min"}
         </p>
       </aside>
     </div>
