@@ -55,7 +55,7 @@ export function SiteNav({ horarios }: { horarios?: TimeSlot[] }) {
         </nav>
 
         <div className="hidden md:flex items-center gap-3 ml-auto">
-          <OpenStatus horarios={horarios} />
+          <OpenStatus horarios={horarios} className="hidden md:inline-flex" />
           <Link href="/pedido">
             <Button size="sm" className="inline-flex items-center gap-1.5">
               Pedir
@@ -106,7 +106,10 @@ export function SiteNav({ horarios }: { horarios?: TimeSlot[] }) {
               {item.label}
             </Link>
           ))}
-          <Link href="/pedido" onClick={() => setOpen(false)} className="mt-2">
+          <div className="mt-3 pt-3 border-t border-paper/10">
+            <OpenStatus horarios={horarios} />
+          </div>
+          <Link href="/pedido" onClick={() => setOpen(false)} className="mt-3">
             <Button size="md" full>
               Pedir{count > 0 ? ` (${count})` : ""} →
             </Button>

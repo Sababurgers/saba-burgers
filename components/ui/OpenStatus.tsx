@@ -1,28 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BUSINESS_HOURS } from "@/lib/data/business-hours";
+import { BUSINESS_HOURS, checkOpenStatus, type TimeSlot } from "@/lib/data/business-hours";
 
-interface TimeSlot { open: string; close: string; }
+interface Status { isOpen: boolean; closeTime: string | null; }
 
-function checkStatus(slots: TimeSlot[]) {
-  const hhmm = new Date().toTimeString().slice(0, 5);
-  const slot = slots.find((s) => hhmm >= s.open && hhmm <= s.close);
-  return { isOpen: !!slot, closeTime: slot?.close ?? null };
-}
-
-export function OpenStatus({ horarios }: { horarios?: TimeSlot[] }) {
+export function OpenStatus({ horarios, className }: { horarios?: TimeSlot[]; className?: string }) {
   const slots = horarios && horarios.length > 0 ? horarios : BUSINESS_HOURS;
-  const [status, setStatus] = useState({ isOpen: false, closeTime: null as string | null });
+  const [status, setStatus] = useState<Status>({ isOpen: false, closeTime: null });
 
   useEffect(() => {
-    setStatus(checkStatus(slots));
-    const id = setInterval(() => setStatus(checkStatus(slots)), 60_000);
+    setStatus(checkOpenStatus(slots));
+    const id = setInterval(() => setStatus(checkOpenStatus(slots)), 60_000);
     return () => clearInterval(id);
   }, [slots]);
 
   return (
-    <span className="hidden md:inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em]">
+    <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] ${className ?? ""}`}>
       <span className={`w-1.5 h-1.5 rounded-full flex-none ${status.isOpen ? "bg-success" : "bg-stone"}`} />
       {status.isOpen ? (
         <span className="text-paper/70">

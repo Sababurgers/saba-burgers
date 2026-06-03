@@ -8,24 +8,36 @@ export const BUSINESS_HOURS: TimeSlot[] = [
   { open: "20:00", close: "23:30" },
 ];
 
+function toMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function isWithinSlot(nowMin: number, slot: TimeSlot): boolean {
+  const open = toMinutes(slot.open);
+  const close = toMinutes(slot.close);
+  // Turno normal (ej. 13:00–16:30)
+  if (close >= open) return nowMin >= open && nowMin <= close;
+  // Turno que cruza medianoche (ej. 20:00–04:00)
+  return nowMin >= open || nowMin <= close;
+}
+
+export function horariosLabel(slots: TimeSlot[]): string {
+  return slots.map((s) => `${s.open}–${s.close}`).join(" · ");
+}
+
 export function businessHoursLabel(): string {
-  return BUSINESS_HOURS.map((s) => `${s.open}–${s.close}`).join(" · ");
+  return horariosLabel(BUSINESS_HOURS);
+}
+
+export function checkOpenStatus(slots: TimeSlot[]): { isOpen: boolean; closeTime: string | null } {
+  const nowMin = toMinutes(new Date().toTimeString().slice(0, 5));
+  const slot = slots.find((s) => isWithinSlot(nowMin, s));
+  return { isOpen: !!slot, closeTime: slot?.close ?? null };
 }
 
 export function isTimeWithinHours(time: string): boolean {
   if (!time) return false;
-  return BUSINESS_HOURS.some((s) => time >= s.open && time <= s.close);
-}
-
-export function isOpenNow(): boolean {
-  const now = new Date();
-  const hhmm = now.toTimeString().slice(0, 5);
-  return isTimeWithinHours(hhmm);
-}
-
-export function currentCloseTime(): string | null {
-  const now = new Date();
-  const hhmm = now.toTimeString().slice(0, 5);
-  const slot = BUSINESS_HOURS.find((s) => hhmm >= s.open && hhmm <= s.close);
-  return slot?.close ?? null;
+  const nowMin = toMinutes(time);
+  return BUSINESS_HOURS.some((s) => isWithinSlot(nowMin, s));
 }
