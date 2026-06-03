@@ -71,6 +71,7 @@ export function SiteNav({ horarios }: { horarios?: TimeSlot[] }) {
 
         {/* Mobile toggle */}
         <div className="md:hidden ml-auto flex items-center gap-2">
+          <OpenStatus horarios={horarios} />
           {count > 0 && (
             <Link
               href="/pedido"
