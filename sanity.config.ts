@@ -15,13 +15,9 @@ export default defineConfig({
           .title("Saba Burgers CMS")
           .items([
             S.listItem()
-              .title("🖼️  Imágenes del sitio")
-              .child(
-                S.document()
-                  .schemaType("siteSettings")
-                  .documentId("siteSettings")
-                  .title("Imágenes del sitio")
-              ),
+              .title("🖼️  Ajustes del sitio")
+              .schemaType("siteSettings")
+              .child(S.documentTypeList("siteSettings").title("Ajustes del sitio")),
             S.divider(),
             S.listItem()
               .title("🍔  Productos")

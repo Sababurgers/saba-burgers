@@ -1,6 +1,25 @@
 export interface TimeSlot {
   open: string;
   close: string;
+  days?: string[];
+}
+
+const ALL_DAYS = ["lun", "mar", "mie", "jue", "vie", "sab", "dom"];
+const DAY_LABELS: Record<string, string> = {
+  lun: "Lun", mar: "Mar", mie: "Mié", jue: "Jue", vie: "Vie", sab: "Sáb", dom: "Dom",
+};
+
+function daysLabel(days?: string[]): string {
+  if (!days || days.length === 0 || days.length === 7) return "Lun a Dom";
+  // Detectar rango consecutivo
+  const sorted = [...days].sort((a, b) => ALL_DAYS.indexOf(a) - ALL_DAYS.indexOf(b));
+  const isConsecutive = sorted.every((d, i) =>
+    i === 0 || ALL_DAYS.indexOf(d) === ALL_DAYS.indexOf(sorted[i - 1]) + 1
+  );
+  if (isConsecutive && sorted.length > 2) {
+    return `${DAY_LABELS[sorted[0]]} a ${DAY_LABELS[sorted[sorted.length - 1]]}`;
+  }
+  return sorted.map((d) => DAY_LABELS[d]).join(", ");
 }
 
 export const BUSINESS_HOURS: TimeSlot[] = [
@@ -23,7 +42,7 @@ function isWithinSlot(nowMin: number, slot: TimeSlot): boolean {
 }
 
 export function horariosLabel(slots: TimeSlot[]): string {
-  return slots.map((s) => `${s.open}–${s.close}`).join(" · ");
+  return slots.map((s) => `${s.open}–${s.close} · ${daysLabel(s.days)}`).join(" / ");
 }
 
 export function businessHoursLabel(): string {
