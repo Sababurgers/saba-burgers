@@ -24,6 +24,12 @@ function getTodayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function getDefaultTime(slots: TimeSlot[]): string {
+  // Usa la apertura del primer turno como hora por defecto
+  if (slots.length > 0) return slots[0].open;
+  return "13:00";
+}
+
 export function ReservationForm({ horarios }: { horarios?: TimeSlot[] }) {
   const slots = horarios?.length ? horarios : BUSINESS_HOURS;
   const router = useRouter();
@@ -40,7 +46,7 @@ export function ReservationForm({ horarios }: { horarios?: TimeSlot[] }) {
     resolver: zodResolver(Schema),
     defaultValues: {
       date: getTodayISO(),
-      time: "20:00",
+      time: getDefaultTime(slots),
       partySize: 2,
     },
   });

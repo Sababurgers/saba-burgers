@@ -3,7 +3,7 @@ import { LOCATION } from "@/lib/data/locations";
 
 export const metadata = {
   title: "Ubicación — Saba Burgers · L'Olleria, Valencia",
-  description: "Encuéntranos en C. Ausìás March, 22, 46850 L'Olleria, Valencia. Abierto 13:00–16:30 · 20:00–23:30.",
+  description: "Encuéntranos en C. Ausìás March, 22, 46850 L'Olleria, Valencia. Take away y reservas.",
 };
 
 export default function UbicacionPage() {
