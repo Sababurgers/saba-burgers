@@ -42,7 +42,19 @@ function isWithinSlot(nowMin: number, slot: TimeSlot): boolean {
 }
 
 export function horariosLabel(slots: TimeSlot[]): string {
-  return slots.map((s) => `${s.open}–${s.close} · ${daysLabel(s.days)}`).join(" / ");
+  // Agrupa los turnos que tienen exactamente los mismos días
+  const groups = new Map<string, TimeSlot[]>();
+  for (const slot of slots) {
+    const key = (slot.days ?? []).slice().sort().join(",");
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(slot);
+  }
+  return Array.from(groups.entries())
+    .map(([, group]) => {
+      const times = group.map((s) => `${s.open}–${s.close}`).join(" y ");
+      return `${times} · ${daysLabel(group[0].days)}`;
+    })
+    .join(" / ");
 }
 
 export function businessHoursLabel(): string {
