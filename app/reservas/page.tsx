@@ -1,13 +1,16 @@
 import { ReservationForm } from "./ReservationForm";
 import { LOCATION } from "@/lib/data/locations";
-import { businessHoursLabel } from "@/lib/data/business-hours";
+import { horariosLabel, BUSINESS_HOURS } from "@/lib/data/business-hours";
+import { getSiteSettings } from "@/lib/sanity/queries";
 
 export const metadata = {
   title: "Reservas — Saba Burgers",
   description: "Reserva tu mesa en Saba Burgers, L'Olleria. Sin tarjeta. Confirmamos por email en menos de 1 hora.",
 };
 
-export default function ReservasPage() {
+export default async function ReservasPage() {
+  const settings = await getSiteSettings();
+  const slots = settings.horarios?.length ? settings.horarios : BUSINESS_HOURS;
   return (
     <div className="max-w-screen-xl mx-auto px-6 md:px-8 py-12 md:py-16">
       {/* HEADER */}
@@ -26,7 +29,7 @@ export default function ReservasPage() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8 items-start">
-        <ReservationForm />
+        <ReservationForm horarios={slots} />
 
         {/* SIDEBAR */}
         <aside className="bg-carbon-800 text-paper rounded-lg p-7 flex flex-col gap-5">
@@ -65,7 +68,7 @@ export default function ReservasPage() {
             ))}
           </ul>
           <div className="text-paper/60 font-mono text-[11px] uppercase tracking-[0.14em]">
-            Horario: {businessHoursLabel()} · Lun a Dom
+            Horario: {horariosLabel(slots)} · Lun a Dom
           </div>
         </aside>
       </div>

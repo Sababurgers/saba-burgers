@@ -33,8 +33,16 @@ export const siteSettingsSchema = defineType({
           name: "turno",
           title: "Turno",
           fields: [
-            defineField({ name: "open", title: "Apertura", type: "string", placeholder: "13:00" }),
-            defineField({ name: "close", title: "Cierre", type: "string", placeholder: "16:30" }),
+            defineField({
+              name: "open", title: "Apertura (24h)", type: "string",
+              placeholder: "13:00",
+              validation: (R) => R.required().regex(/^([01]\d|2[0-3]):[0-5]\d$/, { name: "formato", invert: false }).error("Formato incorrecto. Usa HH:MM en 24h, ej: 13:00"),
+            }),
+            defineField({
+              name: "close", title: "Cierre (24h)", type: "string",
+              placeholder: "16:30",
+              validation: (R) => R.required().regex(/^([01]\d|2[0-3]):[0-5]\d$/, { name: "formato", invert: false }).error("Formato incorrecto. Usa HH:MM en 24h, ej: 16:30"),
+            }),
           ],
           preview: {
             select: { title: "open", subtitle: "close" },

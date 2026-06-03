@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { isTimeWithinHours, businessHoursLabel } from "@/lib/data/business-hours";
+import { checkOpenStatus, horariosLabel, BUSINESS_HOURS, type TimeSlot } from "@/lib/data/business-hours";
 import { createReservation } from "./actions";
 
 const Schema = z.object({
@@ -24,7 +24,8 @@ function getTodayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function ReservationForm() {
+export function ReservationForm({ horarios }: { horarios?: TimeSlot[] }) {
+  const slots = horarios?.length ? horarios : BUSINESS_HOURS;
   const router = useRouter();
   const [timeError, setTimeError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,7 +50,7 @@ export function ReservationForm() {
   function handleTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
     const t = e.target.value;
     setValue("time", t);
-    if (t && !isTimeWithinHours(t)) {
+    if (t && !checkOpenStatus(slots).isOpen) {
       setTimeError("Esa hora está fuera del horario del local.");
     } else {
       setTimeError("");
@@ -57,7 +58,13 @@ export function ReservationForm() {
   }
 
   const onSubmit = async (data: FormData) => {
-    if (!isTimeWithinHours(data.time)) {
+    const toMin = (hhmm: string) => { const [h,m] = hhmm.split(":").map(Number); return h*60+m; };
+    const nowMin = toMin(data.time);
+    const valid = slots.some(s => {
+      const o = toMin(s.open), c = toMin(s.close);
+      return c >= o ? nowMin >= o && nowMin <= c : nowMin >= o || nowMin <= c;
+    });
+    if (!valid) {
       setTimeError("Esa hora está fuera del horario del local.");
       return;
     }
@@ -182,7 +189,7 @@ export function ReservationForm() {
         </div>
         <span className="text-stone text-xs">
           Horario del local:{" "}
-          <span className="font-mono">{businessHoursLabel()}</span>
+          <span className="font-mono">{horariosLabel(slots)}</span>
         </span>
         {timeError && <span className="text-tomato text-xs">{timeError}</span>}
         {errors.time && <span className="text-tomato text-xs">{errors.time.message}</span>}

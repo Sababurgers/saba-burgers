@@ -1,6 +1,7 @@
 import { MenuCard } from "@/components/ui/MenuCard";
 import { CartaTabs } from "@/components/ui/CartaTabs";
-import { getProducts, getCategories } from "@/lib/sanity/queries";
+import { getProducts, getCategories, getSiteSettings } from "@/lib/sanity/queries";
+import { horariosLabel, BUSINESS_HOURS } from "@/lib/data/business-hours";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,8 @@ const CATEGORY_DESC: Record<string, string> = {
 const BG_BY_INDEX = ["bg-paper", "bg-paper-2", "bg-paper", "bg-paper-2", "bg-paper"];
 
 export default async function CartaPage() {
-  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
+  const [categories, products, settings] = await Promise.all([getCategories(), getProducts(), getSiteSettings()]);
+  const slots = settings.horarios?.length ? settings.horarios : BUSINESS_HOURS;
 
   return (
     <>
@@ -29,7 +31,7 @@ export default async function CartaPage() {
         <div className="max-w-screen-xl mx-auto px-6 md:px-8 pt-8 md:pt-12 pb-8">
           <span className="inline-flex items-center gap-2 bg-paper/8 border border-paper/15 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em]">
             <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-            13:00–16:30 · 20:00–23:30 · Lun a Dom
+            {horariosLabel(slots)} · Lun a Dom
           </span>
           <h1 className="font-display text-[64px] md:text-[96px] leading-[0.92] text-gold mt-5 mb-3">
             Carta

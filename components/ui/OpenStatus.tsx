@@ -9,9 +9,16 @@ export function OpenStatus({ horarios, className }: { horarios?: TimeSlot[]; cla
   const slots = horarios && horarios.length > 0 ? horarios : BUSINESS_HOURS;
   const [status, setStatus] = useState<Status>({ isOpen: false, closeTime: null });
 
+  const [currentTime, setCurrentTime] = useState("");
+
   useEffect(() => {
-    setStatus(checkOpenStatus(slots));
-    const id = setInterval(() => setStatus(checkOpenStatus(slots)), 60_000);
+    function tick() {
+      const now = new Date();
+      setCurrentTime(now.toTimeString().slice(0, 5));
+      setStatus(checkOpenStatus(slots));
+    }
+    tick();
+    const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
   }, [slots]);
 
@@ -21,7 +28,7 @@ export function OpenStatus({ horarios, className }: { horarios?: TimeSlot[]; cla
       {status.isOpen ? (
         <span className="text-paper/70">
           Abierto
-          {status.closeTime && <span className="text-paper/40"> · {status.closeTime}</span>}
+          {currentTime && <span className="text-paper/40"> · {currentTime}</span>}
         </span>
       ) : (
         <span className="text-paper/40">Cerrado</span>
