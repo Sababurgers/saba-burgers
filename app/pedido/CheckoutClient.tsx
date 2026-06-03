@@ -7,29 +7,55 @@ import { useCartStore } from "@/lib/cart/store";
 import { createCheckoutSession } from "./actions";
 import type { TimeSlot } from "@/lib/data/business-hours";
 
-function generateTimeSlots(slots: TimeSlot[]): string[] {
-  const toMin = (hhmm: string) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
-  const isInSlot = (min: number) => slots.some(s => {
+// ─── Lógica de horarios ──────────────────────────────────────────────────────
+
+function toMin(hhmm: string) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function minToHHMM(min: number) {
+  return `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
+}
+
+function getStatus(horarios: TimeSlot[]) {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+
+  const isOpen = horarios.some(s => {
     const o = toMin(s.open), c = toMin(s.close);
-    return c >= o ? min >= o && min <= c : min >= o || min <= c;
+    return c >= o ? nowMin >= o && nowMin <= c : nowMin >= o || nowMin <= c;
   });
 
-  const now = new Date();
-  const minMin = now.getHours() * 60 + now.getMinutes() + 30;
-  // Redondear al próximo bloque de 30 min
-  const start = Math.ceil(minMin / 30) * 30;
+  // Slots disponibles: todos los bloques de 30 min dentro del horario, a partir de ahora+30min
+  const minStart = Math.ceil((nowMin + 30) / 30) * 30;
+  const slots: string[] = [];
 
-  const result: string[] = [];
-  for (let min = start; min <= start + 300; min += 30) {
-    const actualMin = min % (24 * 60);
-    if (isInSlot(actualMin)) {
-      const h = Math.floor(actualMin / 60).toString().padStart(2, "0");
-      const m = (actualMin % 60).toString().padStart(2, "0");
-      result.push(`${h}:${m}`);
+  for (const s of horarios) {
+    const open = toMin(s.open);
+    const close = toMin(s.close);
+
+    if (close >= open) {
+      // Turno normal
+      for (let m = Math.max(open, minStart); m <= close; m += 30) {
+        slots.push(minToHHMM(m));
+      }
+    } else {
+      // Turno que cruza medianoche (ej: 20:00–04:00)
+      for (let m = Math.max(open, minStart); m < 24 * 60; m += 30) {
+        slots.push(minToHHMM(m));
+      }
     }
   }
-  return result;
+
+  slots.sort();
+  const canOrder = isOpen || slots.length > 0;
+  const nextOpen = !isOpen && slots.length > 0 ? slots[0] : null;
+
+  return { isOpen, canOrder, nextOpen, slots };
 }
+
+// ─── Componente ──────────────────────────────────────────────────────────────
 
 export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
   const router = useRouter();
@@ -41,7 +67,6 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
   const [method, setMethod] = useState<"delivery" | "pickup">("pickup");
   const [payMethod, setPayMethod] = useState<"online" | "local">("online");
   const [pickupTime, setPickupTime] = useState<string>("asap");
-  const timeSlots = generateTimeSlots(horarios);
   const [address, setAddress] = useState("");
   const [floor, setFloor] = useState("");
   const [notes, setNotes] = useState("");
@@ -51,6 +76,7 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const { isOpen, canOrder, nextOpen, slots } = getStatus(horarios);
   const shipping = method === "delivery" ? 2.5 : 0;
   const total = subtotal + shipping;
 
@@ -59,14 +85,14 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
   }
 
   function stepStyle(step: number) {
-    const filled = (step === 1 && items.length > 0) ||
+    const filled =
+      (step === 1 && items.length > 0) ||
       (step === 2 && (method === "pickup" || address.trim())) ||
       (step === 3 && name.trim() && email.trim());
-    return filled
-      ? "bg-success text-paper"
-      : "bg-carbon-800/15 text-carbon-800";
+    return filled ? "bg-success text-paper" : "bg-carbon-800/15 text-carbon-800";
   }
 
+  // Carrito vacío
   if (items.length === 0) {
     return (
       <div className="bg-paper border border-carbon-800/12 rounded-lg p-10 text-center">
@@ -75,11 +101,24 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
         <p className="text-stone max-w-[40ch] mx-auto mb-6">
           Date una vuelta por la carta y añade lo que te apetezca. Te esperamos.
         </p>
-        <Link
-          href="/carta"
-          className="inline-block bg-tomato hover:bg-tomato-700 transition text-paper font-mono text-xs uppercase tracking-[0.14em] px-6 py-3.5 rounded-full font-semibold cursor-pointer"
-        >
+        <Link href="/carta" className="inline-block bg-tomato hover:bg-tomato-700 transition text-paper font-mono text-xs uppercase tracking-[0.14em] px-6 py-3.5 rounded-full font-semibold cursor-pointer">
           Ver la carta →
+        </Link>
+      </div>
+    );
+  }
+
+  // Local cerrado sin slots disponibles
+  if (!canOrder) {
+    return (
+      <div className="bg-paper border border-carbon-800/12 rounded-lg p-10 text-center max-w-lg mx-auto">
+        <div className="w-16 h-16 rounded-full bg-paper-3 grid place-items-center mx-auto mb-4 text-3xl">🕐</div>
+        <h2 className="font-section font-bold text-2xl mb-2">Estamos cerrados</h2>
+        <p className="text-stone max-w-[40ch] mx-auto mb-6">
+          Ahora mismo no podemos preparar tu pedido. Consulta nuestro horario y vuelve cuando estemos abiertos.
+        </p>
+        <Link href="/ubicacion" className="inline-block bg-carbon-800 hover:bg-carbon-900 transition text-paper font-mono text-xs uppercase tracking-[0.14em] px-6 py-3.5 rounded-full font-semibold cursor-pointer">
+          Ver horario →
         </Link>
       </div>
     );
@@ -115,6 +154,20 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
     <div className="grid lg:grid-cols-[1fr_380px] gap-8">
       {/* LEFT */}
       <div className="flex flex-col gap-4">
+
+        {/* Banner: abre pronto */}
+        {!isOpen && nextOpen && (
+          <div className="bg-gold/15 border border-gold/30 rounded-lg px-5 py-4 flex items-center gap-3">
+            <span className="text-xl">🕐</span>
+            <div>
+              <p className="font-section font-bold text-sm">Ahora estamos cerrados</p>
+              <p className="text-stone text-xs mt-0.5">
+                Abrimos a las <span className="font-mono font-bold text-carbon-800">{nextOpen}</span>. Puedes elegir esa hora o cualquier otra disponible más abajo.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* STEP 1 — items */}
         <section className="bg-paper border border-carbon-800/12 rounded-lg p-6">
           <h4 className="flex items-center gap-2.5 font-section font-bold text-lg mb-4">
@@ -124,10 +177,7 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
           <div className="flex flex-col">
             {items.map((item) => (
               <div key={item.slug} className="flex items-center gap-3 py-3 border-t border-carbon-800/8 first:border-t-0">
-                <div
-                  className="w-12 h-12 rounded-md bg-paper-3 flex-none"
-                  style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,.04) 0 6px, transparent 6px 12px)" }}
-                />
+                <div className="w-12 h-12 rounded-md bg-paper-3 flex-none" style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,.04) 0 6px, transparent 6px 12px)" }} />
                 <div className="flex-1 min-w-0">
                   <b className="font-section text-sm block truncate">{item.name}</b>
                   <span className="font-mono text-xs text-stone">{fmt(item.price)}</span>
@@ -146,12 +196,14 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
           </Link>
         </section>
 
-        {/* STEP 2 — método */}
+        {/* STEP 2 — método + hora */}
         <section className="bg-paper border border-carbon-800/12 rounded-lg p-6">
           <h4 className="flex items-center gap-2.5 font-section font-bold text-lg mb-4">
             <span className={`w-7 h-7 rounded-full grid place-items-center font-display text-sm leading-none transition-colors ${stepStyle(2)}`}>2</span>
-            ¿Cómo lo quieres?
+            ¿Cómo y cuándo?
           </h4>
+
+          {/* Método */}
           <div className="grid grid-cols-2 gap-2.5">
             {[
               { value: "pickup", label: "📍 Recoger en local", sub: "Recoge cuando esté listo" },
@@ -164,42 +216,40 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
               </label>
             ))}
           </div>
+
           {/* Selector de hora */}
-          {timeSlots.length > 0 && (
-            <div className="mt-4">
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone block mb-2">
-                ¿Cuándo lo quieres?
-              </span>
-              <div className="flex flex-wrap gap-2">
+          <div className="mt-5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone block mb-2.5">
+              ¿A qué hora?
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {isOpen && (
                 <button
                   type="button"
                   onClick={() => setPickupTime("asap")}
                   className={`font-mono text-[11px] uppercase tracking-[0.14em] px-3.5 py-2 rounded-full border transition cursor-pointer ${
-                    pickupTime === "asap"
-                      ? "bg-carbon-800 text-paper border-carbon-800"
-                      : "border-carbon-800/20 hover:border-carbon-800/40"
+                    pickupTime === "asap" ? "bg-carbon-800 text-paper border-carbon-800" : "border-carbon-800/20 hover:border-carbon-800/40"
                   }`}
                 >
                   Lo antes posible
                 </button>
-                {timeSlots.map((slot) => (
-                  <button
-                    key={slot}
-                    type="button"
-                    onClick={() => setPickupTime(slot)}
-                    className={`font-mono text-[11px] uppercase tracking-[0.14em] px-3.5 py-2 rounded-full border transition cursor-pointer ${
-                      pickupTime === slot
-                        ? "bg-carbon-800 text-paper border-carbon-800"
-                        : "border-carbon-800/20 hover:border-carbon-800/40"
-                    }`}
-                  >
-                    {slot}
-                  </button>
-                ))}
-              </div>
+              )}
+              {slots.map((slot) => (
+                <button
+                  key={slot}
+                  type="button"
+                  onClick={() => setPickupTime(slot)}
+                  className={`font-mono text-[11px] uppercase tracking-[0.14em] px-3.5 py-2 rounded-full border transition cursor-pointer ${
+                    pickupTime === slot ? "bg-carbon-800 text-paper border-carbon-800" : "border-carbon-800/20 hover:border-carbon-800/40"
+                  }`}
+                >
+                  {slot}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
+          {/* Dirección delivery */}
           {method === "delivery" && (
             <div className="mt-4 flex flex-col gap-2.5">
               <div className="grid grid-cols-[2fr_1fr] gap-2.5">
@@ -240,9 +290,17 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
         </section>
       </div>
 
-      {/* RIGHT — summary */}
+      {/* RIGHT — resumen */}
       <aside className="bg-carbon-800 text-paper rounded-lg p-7 lg:sticky lg:top-[88px] self-start border border-carbon-700">
         <h4 className="font-display text-3xl text-gold mb-4">Resumen</h4>
+
+        {pickupTime !== "asap" && (
+          <div className="flex justify-between py-2 text-sm border-b border-paper/10 mb-1">
+            <span>Hora</span>
+            <span className="font-mono font-semibold">{pickupTime}</span>
+          </div>
+        )}
+
         <div className="flex justify-between py-2 text-sm">
           <span>Subtotal</span>
           <span className="font-mono">{fmt(subtotal)}</span>
@@ -269,6 +327,7 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
         >
           {loading ? "Procesando…" : payMethod === "local" ? "Finalizar pedido →" : "Pagar →"}
         </button>
+
         {payMethod === "online" && (
           <p className="mt-3 text-xs text-paper/60 text-center">Pago seguro con Stripe</p>
         )}
