@@ -5,8 +5,33 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/cart/store";
 import { createCheckoutSession } from "./actions";
+import type { TimeSlot } from "@/lib/data/business-hours";
 
-export function CheckoutClient() {
+function generateTimeSlots(slots: TimeSlot[]): string[] {
+  const toMin = (hhmm: string) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
+  const isInSlot = (min: number) => slots.some(s => {
+    const o = toMin(s.open), c = toMin(s.close);
+    return c >= o ? min >= o && min <= c : min >= o || min <= c;
+  });
+
+  const now = new Date();
+  const minMin = now.getHours() * 60 + now.getMinutes() + 30;
+  // Redondear al próximo bloque de 30 min
+  const start = Math.ceil(minMin / 30) * 30;
+
+  const result: string[] = [];
+  for (let min = start; min <= start + 300; min += 30) {
+    const actualMin = min % (24 * 60);
+    if (isInSlot(actualMin)) {
+      const h = Math.floor(actualMin / 60).toString().padStart(2, "0");
+      const m = (actualMin % 60).toString().padStart(2, "0");
+      result.push(`${h}:${m}`);
+    }
+  }
+  return result;
+}
+
+export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.subtotal());
@@ -15,6 +40,8 @@ export function CheckoutClient() {
 
   const [method, setMethod] = useState<"delivery" | "pickup">("pickup");
   const [payMethod, setPayMethod] = useState<"online" | "local">("online");
+  const [pickupTime, setPickupTime] = useState<string>("asap");
+  const timeSlots = generateTimeSlots(horarios);
   const [address, setAddress] = useState("");
   const [floor, setFloor] = useState("");
   const [notes, setNotes] = useState("");
@@ -127,8 +154,8 @@ export function CheckoutClient() {
           </h4>
           <div className="grid grid-cols-2 gap-2.5">
             {[
-              { value: "pickup", label: "📍 Recoger en local", sub: "Listo en 12 min" },
-              { value: "delivery", label: "🛵 Delivery", sub: "Llega en 25–35 min" },
+              { value: "pickup", label: "📍 Recoger en local", sub: "Recoge cuando esté listo" },
+              { value: "delivery", label: "🛵 Delivery", sub: "Te lo llevamos a casa" },
             ].map((opt) => (
               <label key={opt.value} className={`block border-[1.5px] rounded-md p-3.5 cursor-pointer transition ${method === opt.value ? "border-tomato bg-tomato/5" : "border-carbon-800/12 hover:border-carbon-800/30"}`}>
                 <input type="radio" name="method" value={opt.value} checked={method === opt.value} onChange={() => setMethod(opt.value as "delivery" | "pickup")} className="sr-only" />
@@ -137,6 +164,42 @@ export function CheckoutClient() {
               </label>
             ))}
           </div>
+          {/* Selector de hora */}
+          {timeSlots.length > 0 && (
+            <div className="mt-4">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone block mb-2">
+                ¿Cuándo lo quieres?
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPickupTime("asap")}
+                  className={`font-mono text-[11px] uppercase tracking-[0.14em] px-3.5 py-2 rounded-full border transition cursor-pointer ${
+                    pickupTime === "asap"
+                      ? "bg-carbon-800 text-paper border-carbon-800"
+                      : "border-carbon-800/20 hover:border-carbon-800/40"
+                  }`}
+                >
+                  Lo antes posible
+                </button>
+                {timeSlots.map((slot) => (
+                  <button
+                    key={slot}
+                    type="button"
+                    onClick={() => setPickupTime(slot)}
+                    className={`font-mono text-[11px] uppercase tracking-[0.14em] px-3.5 py-2 rounded-full border transition cursor-pointer ${
+                      pickupTime === slot
+                        ? "bg-carbon-800 text-paper border-carbon-800"
+                        : "border-carbon-800/20 hover:border-carbon-800/40"
+                    }`}
+                  >
+                    {slot}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {method === "delivery" && (
             <div className="mt-4 flex flex-col gap-2.5">
               <div className="grid grid-cols-[2fr_1fr] gap-2.5">
@@ -206,11 +269,9 @@ export function CheckoutClient() {
         >
           {loading ? "Procesando…" : payMethod === "local" ? "Finalizar pedido →" : "Pagar →"}
         </button>
-        <p className="mt-3 text-xs text-paper/60 text-center">
-          {payMethod === "online"
-            ? (method === "delivery" ? "Llegada estimada: ~30 min · " : "Listo en: ~12 min · ") + "Pago seguro"
-            : method === "delivery" ? "Llegada estimada: ~30 min" : "Listo en: ~12 min"}
-        </p>
+        {payMethod === "online" && (
+          <p className="mt-3 text-xs text-paper/60 text-center">Pago seguro con Stripe</p>
+        )}
       </aside>
     </div>
   );

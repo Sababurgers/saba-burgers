@@ -50,8 +50,8 @@ export default async function HomePage() {
             </div>
             <dl className="mt-9 pt-6 border-t border-paper/10 grid grid-cols-3 gap-6">
               <div>
-                <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-paper/60">Tiempo</dt>
-                <dd className="mt-1 text-sm font-medium">15 min · take away</dd>
+                <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-paper/60">Servicio</dt>
+                <dd className="mt-1 text-sm font-medium">Take away · Reservas</dd>
               </div>
               <div>
                 <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-paper/60">Reservas</dt>
@@ -128,8 +128,8 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               { stat: "250g", img: settings.whySaba1, placeholder: "Carne fresca", desc: "Carne fresca, prensada al momento. Nunca congelada. Nunca pre-formada." },
-              { stat: "15min", img: settings.whySaba2, placeholder: "Plancha caliente", desc: "Tiempo del primer click al primer mordisco. Recogida o delivery." },
-              { stat: "100%", img: settings.whySaba3, placeholder: "Cocina / detalle", desc: "Pan artesanal, masa casera, salsas hechas aquí. Cada plato pasa por nuestras manos." },
+              { stat: "100%", img: settings.whySaba2, placeholder: "Plancha caliente", desc: "Pan artesanal, masa casera, salsas hechas aquí. Cada plato pasa por nuestras manos." },
+              { stat: "★★", img: settings.whySaba3, placeholder: "Cocina / detalle", desc: "Subcampeones del Burger Showdown Alicante 2025. El reconocimiento de un trabajo bien hecho." },
             ].map(({ stat, img, placeholder, desc }) => (
               <div key={stat} className="bg-paper/5 border border-paper/10 rounded-lg overflow-hidden flex flex-col">
                 <div className="aspect-[16/10] flex-none overflow-hidden">

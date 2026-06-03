@@ -53,8 +53,7 @@ export default async function ReservasPage() {
           </div>
           <ul className="m-0 p-0 list-none">
             {[
-              "Reserva sin tarjeta — confirmamos por email en menos de 1 hora.",
-              "Tu mesa te espera hasta 15 min después de la hora reservada.",
+              "Reserva sin tarjeta — confirmamos por email.",
               "Para grupos de 11+, escríbenos al " + LOCATION.phone + ".",
               "¿Cumpleaños? Avísanos y te dejamos algo dulce.",
             ].map((t) => (
