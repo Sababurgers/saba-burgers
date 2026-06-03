@@ -24,7 +24,7 @@ export default function ConfirmacionPedidoPage() {
           Pedido confirmado
         </span>
         <h1 className="font-display text-[44px] md:text-[64px] leading-[0.92] mt-2 mb-3 ">
-          ¡Brasa servida!
+          ¡Listo, campeón!
         </h1>
         <p className="text-stone max-w-[46ch] mx-auto mb-8">
           Hemos recibido tu pedido. Te avisamos cuando esté listo.

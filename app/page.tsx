@@ -6,9 +6,11 @@ import { REVIEWS, REVIEW_STATS } from "@/lib/data/reviews";
 
 export const dynamic = "force-dynamic";
 import { getFeaturedProducts, getSiteSettings } from "@/lib/sanity/queries";
+import { horariosLabel, BUSINESS_HOURS } from "@/lib/data/business-hours";
 
 export default async function HomePage() {
   const [featured, settings] = await Promise.all([getFeaturedProducts(3), getSiteSettings()]);
+  const slots = settings.horarios?.length ? settings.horarios : BUSINESS_HOURS;
 
   return (
     <>
@@ -33,11 +35,11 @@ export default async function HomePage() {
           <div>
             <span className="inline-flex items-center gap-2 bg-paper/8 border border-paper/15 rounded-full px-3 py-1.5 mb-7 font-mono text-[11px] uppercase tracking-[0.14em]">
               <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-              Hamburguesas con alma · desde 2022
+              {horariosLabel(slots)}
             </span>
             <h1 className="font-display text-[56px] md:text-[88px] leading-[0.92] mb-5 ">
-              Brasa,<br />queso y<br />
-              <span className="text-gold">nada más.</span>
+              Hamburguesas<br />
+              <span className="text-gold">con alma.</span>
             </h1>
             <p className="text-paper/80 text-lg max-w-[42ch] mb-7">
               Carne fresca prensada al momento, queso amarillo fundido bajo campana y pan brioche
@@ -83,12 +85,12 @@ export default async function HomePage() {
       {/* MARQUEE */}
       <div className="bg-gold text-carbon-800 py-4 overflow-hidden">
         <div className="flex items-center gap-12 font-display text-2xl whitespace-nowrap animate-[scroll_30s_linear_infinite]">
-          <span className="px-6">BRASA</span><span className="opacity-70">★</span>
+          <span className="px-6">SMASH</span><span className="opacity-70">★</span>
           <span>HECHA A MANO</span><span className="opacity-70">★</span>
           <span>DESDE 2022</span><span className="opacity-70">★</span>
           <span>SMASHBURGER</span><span className="opacity-70">★</span>
           <span>L&apos;OLLERIA</span><span className="opacity-70">★</span>
-          <span className="px-6">BRASA</span><span className="opacity-70">★</span>
+          <span className="px-6">SMASH</span><span className="opacity-70">★</span>
           <span>HECHA A MANO</span><span className="opacity-70">★</span>
           <span>DESDE 2022</span><span className="opacity-70">★</span>
           <span>SMASHBURGER</span><span className="opacity-70">★</span>
@@ -182,7 +184,7 @@ export default async function HomePage() {
             <h3 className="font-display text-[44px] md:text-[56px] leading-[0.95] mb-3 ">
               ¿Y entonces?
             </h3>
-            <p className="max-w-[42ch] opacity-90">Pide por delivery o reserva una mesa. En 15 minutos tienes brasa servida.</p>
+            <p className="max-w-[42ch] opacity-90">Pide por delivery o reserva una mesa. En 15 minutos tienes tu pedido listo.</p>
           </div>
           <div className="flex flex-wrap gap-3 md:justify-end">
             <Link href="/pedido"><Button size="lg" className="bg-paper text-tomato hover:bg-paper-2">Pedir ahora</Button></Link>

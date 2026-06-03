@@ -66,7 +66,7 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-col md:flex-row md:justify-between gap-2 pt-4 font-mono text-[11px] text-paper/60">
           <span>© 2026 Saba Burgers S.L. · C. Ausìás March, 22, 46850 L&apos;Olleria</span>
-          <span>Hecho con brasa en L&apos;Olleria</span>
+          <span>Hecho con alma en L&apos;Olleria</span>
         </div>
       </div>
     </footer>

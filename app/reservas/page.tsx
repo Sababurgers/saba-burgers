@@ -17,7 +17,7 @@ export default async function ReservasPage() {
       <header className="max-w-[60ch] mb-10">
         <span className="inline-flex items-center gap-2 bg-carbon-800/8 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] mb-4">
           <span className="w-1.5 h-1.5 rounded-full bg-tomato" />
-          Reservas · gratis
+          {horariosLabel(slots)}
         </span>
         <h1 className="font-display text-[44px] md:text-[64px] leading-[0.92] mb-3 ">
           Reserva tu mesa
