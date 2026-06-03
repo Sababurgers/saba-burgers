@@ -4,6 +4,8 @@ import { SiteShell } from "@/components/layout/SiteShell";
 import { getSiteSettings } from "@/lib/sanity/queries";
 import "./globals.css";
 
+export const revalidate = 60;
+
 const alfa = Alfa_Slab_One({
   subsets: ["latin"],
   weight: "400",
