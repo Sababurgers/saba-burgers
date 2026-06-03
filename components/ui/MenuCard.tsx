@@ -88,10 +88,11 @@ export function MenuCard({ product }: { product: MenuCardProduct }) {
 
       <div className="px-5 pb-5 flex items-center gap-3">
         {/* Selector de cantidad */}
-        <div className="flex items-center gap-2 border border-carbon-800/15 rounded-full px-1 py-1">
+        <div className="flex items-center gap-2 border border-carbon-800/15 rounded-full px-1 py-1" data-cart-action="qty">
           <button
             onClick={() => setCount((c) => Math.max(1, c - 1))}
             disabled={count <= 1}
+            data-cart-action="qty"
             className="w-7 h-7 rounded-full flex items-center justify-center font-mono text-base leading-none transition hover:bg-carbon-800/8 disabled:opacity-25 disabled:pointer-events-none cursor-pointer"
             aria-label="Quitar uno"
           >
@@ -100,6 +101,7 @@ export function MenuCard({ product }: { product: MenuCardProduct }) {
           <span className="font-mono text-sm font-semibold w-4 text-center">{count}</span>
           <button
             onClick={() => setCount((c) => c + 1)}
+            data-cart-action="qty"
             className="w-7 h-7 rounded-full flex items-center justify-center font-mono text-base leading-none transition hover:bg-carbon-800/8 cursor-pointer"
             aria-label="Añadir uno"
           >
