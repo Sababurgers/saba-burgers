@@ -19,36 +19,41 @@ function minToHHMM(min: number) {
   return `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
 }
 
+function isWithin(nowMin: number, s: TimeSlot) {
+  const o = toMin(s.open), c = toMin(s.close);
+  return c >= o ? nowMin >= o && nowMin <= c : nowMin >= o || nowMin <= c;
+}
+
 function getStatus(horarios: TimeSlot[]) {
   const now = new Date();
   const nowMin = now.getHours() * 60 + now.getMinutes();
 
-  const isOpen = horarios.some(s => {
-    const o = toMin(s.open), c = toMin(s.close);
-    return c >= o ? nowMin >= o && nowMin <= c : nowMin >= o || nowMin <= c;
-  });
+  // Turno abierto ahora mismo (si lo hay).
+  const current = horarios.find(s => isWithin(nowMin, s));
+  const isOpen = !!current;
 
-  // Primer hueco posible: 30 min a partir de ahora, redondeado a la media hora.
-  const minStart = Math.ceil((nowMin + 30) / 30) * 30;
+  // Solo se puede pedir si está abierto AHORA. Nada de pre-pedidos con el local cerrado.
+  const canOrder = isOpen;
 
-  // Mostramos UN solo rango: el turno abierto ahora o el próximo de hoy.
-  // La ventana va desde la apertura (o ahora+30) hasta media hora antes del cierre.
-  const ordered = [...horarios].sort((a, b) => toMin(a.open) - toMin(b.open));
-  const slots: string[] = [];
-
-  for (const s of ordered) {
-    const open = toMin(s.open);
-    const close = toMin(s.close);
-    if (close < open) continue; // turnos que cruzan medianoche: sin slots programados
-    const windowStart = Math.max(open, minStart);
-    const windowEnd = close - 30; // media hora antes del cierre
-    if (windowEnd < windowStart) continue; // este turno ya no da tiempo
-    for (let m = windowStart; m <= windowEnd; m += 30) slots.push(minToHHMM(m));
-    break; // solo el primer turno disponible
+  // Próxima apertura de hoy, para el mensaje de "cerrado".
+  let nextOpen: string | null = null;
+  if (!isOpen) {
+    const opens = horarios.map(s => toMin(s.open)).filter(o => o > nowMin).sort((a, b) => a - b);
+    if (opens.length) nextOpen = minToHHMM(opens[0]);
   }
 
-  const canOrder = isOpen || slots.length > 0;
-  const nextOpen = !isOpen && slots.length > 0 ? slots[0] : null;
+  // Slots del turno actual: desde ahora+30min (redondeado) hasta media hora antes del cierre.
+  const slots: string[] = [];
+  if (current) {
+    const open = toMin(current.open);
+    const close = toMin(current.close);
+    if (close >= open) {
+      const minStart = Math.ceil((nowMin + 30) / 30) * 30;
+      const windowStart = Math.max(open, minStart);
+      const windowEnd = close - 30;
+      for (let m = windowStart; m <= windowEnd; m += 30) slots.push(minToHHMM(m));
+    }
+  }
 
   return { isOpen, canOrder, nextOpen, slots };
 }
@@ -60,7 +65,6 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.subtotal());
   const setQty = useCartStore((s) => s.setQty);
-  const clear = useCartStore((s) => s.clear);
 
   // Recalcula el estado de apertura cada minuto para que una pestaña
   // abierta no se quede "abierta" tras la hora de cierre.
@@ -130,7 +134,9 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
         <div className="w-16 h-16 rounded-full bg-paper-3 grid place-items-center mx-auto mb-4 text-3xl">🕐</div>
         <h2 className="font-section font-bold text-2xl mb-2">Estamos cerrados</h2>
         <p className="text-stone max-w-[40ch] mx-auto mb-6">
-          Ahora mismo no podemos preparar tu pedido. Consulta nuestro horario y vuelve cuando estemos abiertos.
+          {nextOpen
+            ? <>Ahora mismo no podemos preparar tu pedido. Abrimos hoy a las <span className="font-mono font-bold text-carbon-800">{nextOpen}</span> — vuelve entonces y te lo preparamos al momento.</>
+            : <>Ahora mismo no podemos preparar tu pedido. Consulta nuestro horario y vuelve cuando estemos abiertos.</>}
         </p>
         <Link href="/ubicacion" className="inline-block bg-carbon-800 hover:bg-carbon-900 transition text-paper font-mono text-xs uppercase tracking-[0.14em] px-6 py-3.5 rounded-full font-semibold cursor-pointer">
           Ver horario →
@@ -185,8 +191,8 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
         window.location.href = res.redirectUrl; // a la pasarela de Stripe
         return;
       }
-      // Confirmado en el local o en modo demo: vaciamos el carrito.
-      clear();
+      // Confirmado (en local o modo demo). El carrito lo vacía la página de
+      // confirmación al cargar, así evitamos el parpadeo de "carrito vacío".
       router.push("/pedido/confirmacion");
     } catch {
       setError("Ha habido un error. Por favor, inténtalo de nuevo.");
@@ -198,19 +204,6 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
     <div className="grid lg:grid-cols-[1fr_380px] gap-8 pb-28 lg:pb-0">
       {/* LEFT */}
       <div className="flex flex-col gap-4">
-
-        {/* Banner: abre pronto */}
-        {!isOpen && nextOpen && (
-          <div className="bg-gold/15 border border-gold/30 rounded-lg px-5 py-4 flex items-center gap-3">
-            <span className="text-xl">🕐</span>
-            <div>
-              <p className="font-section font-bold text-sm">Ahora estamos cerrados</p>
-              <p className="text-stone text-xs mt-0.5">
-                Abrimos a las <span className="font-mono font-bold text-carbon-800">{nextOpen}</span>. Puedes elegir esa hora o cualquier otra disponible más abajo.
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* STEP 1 — items */}
         <section className="bg-paper border border-carbon-800/12 rounded-lg p-6">

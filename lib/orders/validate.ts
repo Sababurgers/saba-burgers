@@ -20,25 +20,25 @@ function toMin(hhmm: string): number {
   return h * 60 + m;
 }
 
-function isOpenNow(horarios: TimeSlot[], nowMin: number): boolean {
-  return horarios.some((s) => {
+function currentSlot(horarios: TimeSlot[], nowMin: number): TimeSlot | undefined {
+  return horarios.find((s) => {
     const o = toMin(s.open), c = toMin(s.close);
     return c >= o ? nowMin >= o && nowMin <= c : nowMin >= o || nowMin <= c;
   });
 }
 
-// "asap" solo vale si está abierto ahora. Una hora concreta debe caer dentro
-// de un turno, hasta media hora antes del cierre, y no estar en el pasado.
+// El local debe estar abierto AHORA (sin pre-pedidos). "asap" siempre vale si
+// está abierto; una hora concreta debe caer en el turno actual, no estar en el
+// pasado y como muy tarde media hora antes del cierre.
 function isValidPickup(time: string, horarios: TimeSlot[], nowMin: number): boolean {
-  if (time === "asap") return isOpenNow(horarios, nowMin);
+  const current = currentSlot(horarios, nowMin);
+  if (!current) return false; // cerrado → no se acepta ningún pedido
+  if (time === "asap") return true;
   if (!/^\d{2}:\d{2}$/.test(time)) return false;
+  const o = toMin(current.open), c = toMin(current.close);
+  if (c < o) return true; // turno que cruza medianoche: aceptamos como "asap"
   const t = toMin(time);
-  if (t < nowMin) return false;
-  return horarios.some((s) => {
-    const o = toMin(s.open), c = toMin(s.close);
-    if (c < o) return false; // turnos que cruzan medianoche: sin recogida programada
-    return t >= o && t <= c - 30;
-  });
+  return t >= nowMin && t <= c - 30;
 }
 
 export function validateOrder(
