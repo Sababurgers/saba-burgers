@@ -78,6 +78,13 @@ body { font-size: 16px; line-height: 1.55; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
+/* ─── Scrollbar del carrito flotante ─── */
+.cart-scroll { scrollbar-width: thin; scrollbar-color: rgba(253,255,247,.15) transparent; }
+.cart-scroll::-webkit-scrollbar { width: 3px; }
+.cart-scroll::-webkit-scrollbar-track { background: transparent; }
+.cart-scroll::-webkit-scrollbar-thumb { background: rgba(253,255,247,.15); border-radius: 99px; }
+.cart-scroll::-webkit-scrollbar-thumb:hover { background: rgba(253,255,247,.3); }
+
 /* ─── Marquee ─── */
 @keyframes scroll {
   0%   { transform: translateX(0); }

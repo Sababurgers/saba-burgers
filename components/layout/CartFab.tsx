@@ -15,6 +15,15 @@ export function CartFab() {
 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const prevCountRef = useRef(count);
+
+  useEffect(() => {
+    if (count > prevCountRef.current && listRef.current) {
+      listRef.current.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+    }
+    prevCountRef.current = count;
+  }, [count]);
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -46,7 +55,7 @@ export function CartFab() {
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/40">Tu pedido</span>
 
           {/* Lista con controles */}
-          <div className="flex flex-col gap-1 max-h-56 overflow-y-auto -mx-1 px-1">
+          <div ref={listRef} className="flex flex-col gap-1 max-h-56 overflow-y-auto -mx-1 px-1 cart-scroll">
             {items.map((item) => (
               <div key={item.slug} className="flex items-center gap-2 py-1.5">
                 {/* Nombre */}
