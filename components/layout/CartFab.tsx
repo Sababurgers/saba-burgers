@@ -58,6 +58,13 @@ export function CartFab() {
           <div ref={listRef} className="flex flex-col gap-1 max-h-56 overflow-y-auto -mx-1 px-1 cart-scroll">
             {items.map((item) => (
               <div key={item.slug} className="flex items-center gap-2 py-1.5">
+                {/* Imagen */}
+                <div className="w-8 h-8 rounded-md flex-none overflow-hidden bg-paper/10">
+                  {item.imageUrl
+                    ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full" style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 4px, transparent 4px 8px)" }} />
+                  }
+                </div>
                 {/* Nombre */}
                 <span className="flex-1 text-sm text-paper/90 truncate min-w-0">{item.name}</span>
 

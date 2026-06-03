@@ -9,6 +9,7 @@ export interface CartItem {
   name: string;
   price: number;
   weight?: string;
+  imageUrl?: string;
   qty: number;
 }
 
@@ -45,6 +46,7 @@ export const useCartStore = create<CartStore>()(
                 name: product.name,
                 price: product.price,
                 weight: product.weight,
+                imageUrl: product.imageUrl,
                 qty: 1,
               },
             ],

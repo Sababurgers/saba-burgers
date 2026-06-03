@@ -177,7 +177,12 @@ export function CheckoutClient({ horarios = [] }: { horarios?: TimeSlot[] }) {
           <div className="flex flex-col">
             {items.map((item) => (
               <div key={item.slug} className="flex items-center gap-3 py-3 border-t border-carbon-800/8 first:border-t-0">
-                <div className="w-12 h-12 rounded-md bg-paper-3 flex-none" style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,.04) 0 6px, transparent 6px 12px)" }} />
+                <div className="w-12 h-12 rounded-md bg-paper-3 flex-none overflow-hidden">
+                  {item.imageUrl
+                    ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full" style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,.04) 0 6px, transparent 6px 12px)" }} />
+                  }
+                </div>
                 <div className="flex-1 min-w-0">
                   <b className="font-section text-sm block truncate">{item.name}</b>
                   <span className="font-mono text-xs text-stone">{fmt(item.price)}</span>
