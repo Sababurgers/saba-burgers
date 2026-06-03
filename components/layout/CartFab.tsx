@@ -32,13 +32,13 @@ export function CartFab() {
   const total = subtotal.toFixed(2).replace(".", ",");
 
   return (
-    <div ref={ref} className="fixed right-4 bottom-4 md:right-6 md:bottom-6 z-40 flex flex-col items-end gap-2">
+    <div ref={ref} className="fixed right-4 bottom-4 md:right-6 md:bottom-6 z-40 flex flex-col items-end gap-2 pointer-events-none">
 
       {/* Panel expandido */}
       <div className={`
         bg-carbon-800 text-paper rounded-2xl shadow-2xl w-[calc(100vw-2rem)] max-w-xs
         transition-all duration-200 origin-bottom-right overflow-hidden
-        ${open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}
+        ${open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none hidden"}
       `}>
         <div className="p-4 flex flex-col gap-3">
 
@@ -104,7 +104,7 @@ export function CartFab() {
       {/* Bubble */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="bg-tomato hover:bg-tomato-700 active:scale-[0.97] transition text-paper rounded-full shadow-2xl h-14 px-5 flex items-center gap-3 cursor-pointer"
+        className="pointer-events-auto bg-tomato hover:bg-tomato-700 active:scale-[0.97] transition text-paper rounded-full shadow-2xl h-14 px-5 flex items-center gap-3 cursor-pointer"
         aria-label={`Carrito · ${count} productos · ${total} €`}
       >
         <ShoppingCart size={17} strokeWidth={2.2} />
