@@ -69,11 +69,8 @@ export default function ConfirmacionPedidoPage() {
         </div>
 
         <p className="text-stone text-xs mt-8 max-w-[40ch] mx-auto">
-          Hemos enviado el comprobante a tu email. Si tienes alguna duda, escríbenos por{" "}
-          <a
-            href="https://wa.me/34722364407"
-            className="text-tomato underline"
-          >
+          ¿Dudas sobre tu pedido? Escríbenos por{" "}
+          <a href="https://wa.me/34722364407" className="text-tomato underline">
             WhatsApp
           </a>
           .

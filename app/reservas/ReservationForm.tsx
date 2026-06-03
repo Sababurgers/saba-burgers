@@ -47,10 +47,19 @@ export function ReservationForm({ horarios }: { horarios?: TimeSlot[] }) {
 
   const partySize = watch("partySize") ?? 2;
 
+  function isTimeValid(hhmm: string): boolean {
+    const toMin = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+    const nowMin = toMin(hhmm);
+    return slots.some(s => {
+      const o = toMin(s.open), c = toMin(s.close);
+      return c >= o ? nowMin >= o && nowMin <= c : nowMin >= o || nowMin <= c;
+    });
+  }
+
   function handleTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
     const t = e.target.value;
     setValue("time", t);
-    if (t && !checkOpenStatus(slots).isOpen) {
+    if (t && !isTimeValid(t)) {
       setTimeError("Esa hora está fuera del horario del local.");
     } else {
       setTimeError("");
@@ -68,6 +77,7 @@ export function ReservationForm({ horarios }: { horarios?: TimeSlot[] }) {
       setTimeError("Esa hora está fuera del horario del local.");
       return;
     }
+
     setLoading(true);
     try {
       const res = await createReservation(data);
