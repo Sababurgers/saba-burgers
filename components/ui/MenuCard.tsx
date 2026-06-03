@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/lib/cart/store";
+import type { CartProduct } from "@/lib/types/product";
 
-export interface MenuCardProduct {
-  slug: string;
-  name: string;
-  price: number;
-  weight?: string;
+export interface MenuCardProduct extends CartProduct {
   description?: string;
   badge?: string | null;
   imageUrl?: string;
@@ -38,11 +35,15 @@ export function MenuCard({ product }: { product: MenuCardProduct }) {
   const addItem = useCartStore((s) => s.addItem);
   const [count, setCount] = useState(1);
   const [added, setAdded] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
   function handleAdd() {
+    if (added) return;
     for (let i = 0; i < count; i++) addItem(product);
     setAdded(true);
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setAdded(false);
       setCount(1);
     }, 1200);

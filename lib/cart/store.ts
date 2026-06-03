@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { MenuCardProduct as Product } from "@/components/ui/MenuCard";
+import type { CartProduct as Product } from "@/lib/types/product";
 
 export interface CartItem {
   slug: string;
