@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X, ShoppingCart, MapPin } from "lucide-react";
+import { OpenStatus } from "@/components/ui/OpenStatus";
 import { Lockup } from "@/components/brand/Lockup";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -52,6 +53,7 @@ export function SiteNav() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3 ml-auto">
+          <OpenStatus />
           <Link href="/pedido">
             <Button size="sm" className="inline-flex items-center gap-1.5">
               Pedir

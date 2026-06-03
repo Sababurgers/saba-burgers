@@ -22,3 +22,10 @@ export function isOpenNow(): boolean {
   const hhmm = now.toTimeString().slice(0, 5);
   return isTimeWithinHours(hhmm);
 }
+
+export function currentCloseTime(): string | null {
+  const now = new Date();
+  const hhmm = now.toTimeString().slice(0, 5);
+  const slot = BUSINESS_HOURS.find((s) => hhmm >= s.open && hhmm <= s.close);
+  return slot?.close ?? null;
+}
